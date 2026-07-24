@@ -38,18 +38,19 @@ This project goes beyond a simple demo app. It brings together several common en
 - Backend development with Flask and Python
 - External API integration and data handling
 - Authentication, session management, and secure password hashing
-- Database design and persistence with PostgreSQL
+- Database design and persistence with SQLite (default; file-based `fundamentals.db` created automatically)
 - Input validation and protection against common web vulnerabilities
 - Deployment configuration for a production-style hosting environment
 
 ## Technical stack
 
 - Backend: Python, Flask
-- Database: PostgreSQL
+- Database: SQLite (default; file-based `fundamentals.db` created automatically). Optional: PostgreSQL if you configure `DATABASE_URL` and adapt the code.
 - Frontend: HTML, CSS, JavaScript, Jinja2
 - Data source: Yahoo Finance via yfinance
 - Authentication: bcrypt
-- Deployment: Render with Gunicorn
+- Deployment: PythonAnywhere or local Flask
+
 
 ## Project structure
 
@@ -76,8 +77,9 @@ That makes the project useful both as a software portfolio item and as a demonst
 ### Prerequisites
 
 - Python 3.10+
-- PostgreSQL running locally or through a managed service
-- A `.env` file with `DATABASE_URL` and `SECRET_KEY`
+- A `.env` file with `SECRET_KEY` (the app creates a local SQLite database by default).
+
+Optional: set `DATABASE_URL` if you intend to use PostgreSQL or another external database (the repository currently uses SQLite; switching to PostgreSQL requires updating the database connection code).
 
 ### Local development
 
@@ -85,17 +87,17 @@ That makes the project useful both as a software portfolio item and as a demonst
 
 ```bash
 git clone <repo-url>
-cd stockAnalyzer
+cd Fuatilia
 ```
 
 2. Create and activate a virtual environment:
 
 ```bash
-python -m venv stockAnalyzer
+python -m venv Fuatilia
 # Windows PowerShell
-.\stockAnalyzer\Scripts\Activate.ps1
+.\Fuatilia\Scripts\Activate.ps1
 # macOS/Linux
-source stockAnalyzer/bin/activate
+source Fuatilia/bin/activate
 ```
 
 3. Install Python dependencies:
@@ -104,16 +106,16 @@ source stockAnalyzer/bin/activate
 pip install -r requirements.txt
 ```
 
-4. Create a PostgreSQL database and configure environment variables.
+4. Create a `.env` file in the project root with at minimum a `SECRET_KEY`.
 
-Example `.env` file in the project root:
+Example `.env` file in the project root (SQLite default):
 
 ```env
-DATABASE_URL=postgresql://username:password@localhost:5432/stockanalyzer
 SECRET_KEY=your-secret-key
+# Optional: DATABASE_URL=postgresql://username:password@host:5432/dbname
 ```
 
-The app will create its required tables automatically on startup via the database initialization logic in `helpers.py`.
+The app will create its required tables automatically on startup via the database initialization logic in `helpers.py` (it creates a local `fundamentals.db` by default).
 
 5. Run the app locally:
 
@@ -125,18 +127,21 @@ Then open the local URL shown by Flask, typically `http://127.0.0.1:5000/`.
 
 ### Production / deployment notes
 
-The repository includes a Render configuration in `render.yaml` that starts the app with Gunicorn:
+This app is suitable for deployment on PythonAnywhere. Configure your PythonAnywhere WSGI file to import the Flask app from `app.py` and expose it as `application`.
 
-```yaml
-services:
-  - type: web
-    name: stock-analyzer
-    runtime: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app
+Example PythonAnywhere WSGI snippet:
+
+```python
+import sys
+import os
+path = '/home/yourusername/Fuatilia'
+if path not in sys.path:
+    sys.path.insert(0, path)
+
+from app import app as application
 ```
 
-For deployment, set the same environment variables in the host platform, especially `DATABASE_URL` and `SECRET_KEY`.
+Then set `SECRET_KEY` in your PythonAnywhere web app environment variables. By default the app uses the local `fundamentals.db` SQLite file; if you want an external database, set `DATABASE_URL` and adapt the app's DB connection accordingly.
 
 ## Notes
 
