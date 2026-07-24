@@ -49,7 +49,7 @@ This project goes beyond a simple demo app. It brings together several common en
 - Frontend: HTML, CSS, JavaScript, Jinja2
 - Data source: Yahoo Finance via yfinance
 - Authentication: bcrypt
-- Deployment: Render with Gunicorn
+- Deployment: PythonAnywhere or local Flask
 
 
 ## Project structure
@@ -127,24 +127,21 @@ Then open the local URL shown by Flask, typically `http://127.0.0.1:5000/`.
 
 ### Production / deployment notes
 
-The repository includes a Render configuration in `render.yaml` that starts the app with Gunicorn:
+This app is suitable for deployment on PythonAnywhere. Configure your PythonAnywhere WSGI file to import the Flask app from `app.py` and expose it as `application`.
 
-```yaml
-services:
-  - type: web
-    name: stock-analyzer
-    runtime: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app
+Example PythonAnywhere WSGI snippet:
+
+```python
+import sys
+import os
+path = '/home/yourusername/Fuatilia'
+if path not in sys.path:
+    sys.path.insert(0, path)
+
+from app import app as application
 ```
 
-For deployment, set `SECRET_KEY` in the host platform. If you plan to use an external database in production, set `DATABASE_URL` and adapt the app's DB connection accordingly; by default the app uses the local `fundamentals.db` SQLite file.
-
-If you run locally with Gunicorn, you can use the command used in this workspace:
-
-```bash
-gunicorn app:app --bind 0.0.0.0:8000
-```
+Then set `SECRET_KEY` in your PythonAnywhere web app environment variables. By default the app uses the local `fundamentals.db` SQLite file; if you want an external database, set `DATABASE_URL` and adapt the app's DB connection accordingly.
 
 ## Notes
 
