@@ -44,3 +44,4 @@ class CompanyLookup():
         
         # if nothing is found, return None
         return None
+        

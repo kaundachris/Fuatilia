@@ -3,7 +3,6 @@ from yfinance import Ticker
 import plotly.express as px
 
 
-
 class Stock():
     """
         Pulls the company's financial data, if present
