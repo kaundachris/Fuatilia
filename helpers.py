@@ -58,6 +58,9 @@ def initialize_db():
         # commit changes to the database
         db.commit()
 
+    # close the connection
+    db.close() 
+
 
 # retreive stock data and store in a usable format
 def retrieve_stock_data(ticker: str):
@@ -105,6 +108,9 @@ def store_data(data: dict):
 
         # commit changes
         db.commit()
+
+    # close the connection
+    db.close()
 
 
 # to determine which link to show in the navigation (login, logout, register)
@@ -167,7 +173,12 @@ def searches(sort_by=None, order="ASC"):
         if sort_by:
             # if sort parameter present, sort the results
             query = f"SELECT * FROM searches WHERE user_id = ? ORDER BY {sort_by} {order}"
-            return db.execute(query, (session["user_id"],)).fetchall()
+            results = db.execute(query, (session["user_id"],)).fetchall()
         else:
             # if search parameter missing, return results as is
-            return db.execute("SELECT * FROM searches WHERE user_id = ?", (session["user_id"],)).fetchall()
+            results = db.execute("SELECT * FROM searches WHERE user_id = ?", (session["user_id"],)).fetchall()
+
+    # close the connection
+    db.close()
+
+    return results
