@@ -1,6 +1,4 @@
 from flask import Flask, render_template, request, redirect, session
-import psycopg2
-import psycopg2.extras
 import bcrypt
 import os
 
@@ -78,42 +76,41 @@ def login():
         return render_template("login.html", message="Please enter your username and password!")
 
     # check that the username and password exist in database
-    connection = get_db()
-    with connection.cursor(cursor_factory=psycopg2.extras.DictCursor) as db:
-        db.execute("SELECT * FROM users WHERE username = %s", (username,))
-        user = db.fetchone()
+    with get_db() as db:
+        user = db.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
 
         # check for existence of username
         if not user:
-            connection.close()
             session["login_counter"] += 1
             return render_template("login.html", message="Invalid username or password!")
 
         # check that the password matches
         if not bcrypt.checkpw(password.encode("utf-8"), user["password_hash"].encode("utf-8")):
-            connection.close()
             session["login_counter"] += 1
             return render_template("login.html", message="Invalid username or password!")
 
-        # store the user's last search
-        stock = session.get("last_ticker")
+        
 
         # Set user_id in session after successful login
         session.clear()
         session["user_id"] = user["id"]
 
-        # Store the user's last search - if available - in their database
-        if stock:
-            # retrieve its data
-            stock_data = retrieve_stock_data(stock)
-        
-            # store this in the database
-            if stock_data:
-                store_data(stock_data)
-        
-        # close database connection
-        connection.close()
-        return redirect("/history")
+    # close the connection
+    db.close()
+    
+    # store the user's last search
+    stock = session.get("last_ticker")
+
+    # Store the user's last search - if available - in their database
+    if stock:
+        # retrieve its data
+        stock_data = retrieve_stock_data(stock)
+    
+        # store this in the database
+        if stock_data:
+            store_data(stock_data)
+    
+    return redirect("/history")
     
 
 @app.route("/register", methods=["GET", "POST"])
@@ -142,47 +139,45 @@ def register():
     if not check_password(password):
         return render_template("register.html", message="Must contain at least one number and one letter")
 
+    # check that the passwords match
     if password != confirm_password:
         return render_template("register.html", message="Passwords don't match")
 
-    connection = get_db()
-    with connection.cursor(cursor_factory=psycopg2.extras.DictCursor) as db:
+    with get_db() as db:
         # check that the username does not exist in database
-        db.execute("SELECT * FROM users WHERE username = %s", (username,))
-        user = db.fetchone()
+        user = db.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
         if user:
-            connection.close()
             return render_template("register.html", message="Username exists! Log in please.")
 
         # hash the password
         hash_pw = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
 
         # add the user to the database
-        db.execute("INSERT INTO users (username, password_hash) VALUES (%s, %s)",
+        db.execute("INSERT INTO users (username, password_hash) VALUES (?, ?)",
                 (username, hash_pw.decode("utf-8")))
 
         # get user's id
-        db.execute("SELECT * FROM users WHERE username = %s", (username,))
-        user = db.fetchone()
+        user = db.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
 
         # Check that user has data
         if user:
             # Set user_id in session after successful login
             session["user_id"] = user["id"]
 
-        # Store the user's search - if available - in their database
-        stock = session.get("last_ticker")
-        if stock:
-            # retrieve its data
-            stock_data = retrieve_stock_data(stock)
-        
-            # store this in the database
-            if stock_data:
-                store_data(stock_data)
-            
-        connection.close()
+    # close the connection
+    db.close()
 
-        return redirect("/history")
+    # Store the user's search - if available - in their database
+    stock = session.get("last_ticker")
+    if stock:
+        # retrieve its data
+        stock_data = retrieve_stock_data(stock)
+    
+        # store this in the database
+        if stock_data:
+            store_data(stock_data)
+
+    return redirect("/history")
 
 
 @app.route("/reset", methods=["GET", "POST"])
@@ -211,15 +206,13 @@ def reset():
     if not check_password(password):
         return render_template("reset.html", message="Must contain at least one number and one letter")
 
+    # check that the passwords match
     if password != confirm_password:
         return render_template("reset.html", message="Passwords don't match")
 
-    connection = get_db()
-    with connection.cursor(cursor_factory=psycopg2.extras.DictCursor) as db:
+    with get_db() as db:
         # Ensure that the username exists in database
-        db.execute("SELECT * FROM users WHERE username = %s", (username,))
-        user = db.fetchone()
-
+        user = db.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
         if not user:
             return render_template("reset.html", message="Username does not exist")
 
@@ -227,31 +220,31 @@ def reset():
         hash_pw = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
 
         # add the new password to the user's database
-        db.execute("UPDATE users SET password_hash = %s WHERE username = %s",
+        db.execute("UPDATE users SET password_hash = ? WHERE username = ?",
                 (hash_pw.decode("utf-8"), username))
 
         # get user's id
-        db.execute("SELECT * FROM users WHERE username = %s", (username,))
-        user = db.fetchone()
+        user = db.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
 
         # Check that user has data
         if user:
             # Set user_id in session after successful login
             session["user_id"] = user["id"]
 
-        # Store the user's search - if available - in their database
-        stock = session.get("last_ticker")
-        if stock:
-            # retrieve its data
-            stock_data = retrieve_stock_data(stock)
-        
-            # store this in the database
-            if stock_data:
-                store_data(stock_data)
-            
-        connection.close()
+    # close the connection
+    db.close()
 
-        return redirect("/history")
+    # Store the user's search - if available - in their database
+    stock = session.get("last_ticker")
+    if stock:
+        # retrieve its data
+        stock_data = retrieve_stock_data(stock)
+    
+        # store this in the database
+        if stock_data:
+            store_data(stock_data)
+
+    return redirect("/history")
 
 
 @app.route("/history", methods=["GET", "POST"])
@@ -318,11 +311,12 @@ def delete():
         return render_template("history.html", history=searches(), message="Delete failed. Please try again")
 
     # delete the stock data
-    connection = get_db()
-    with connection.cursor(cursor_factory=psycopg2.extras.DictCursor) as db:
-        db.execute("DELETE FROM searches WHERE ticker = %s AND user_id = %s",
+    with get_db() as db:
+        db.execute("DELETE FROM searches WHERE ticker = ? AND user_id = ?",
                 (stock_to_delete, session["user_id"]))
-    connection.close()
+
+    # close the connection
+    db.close()
 
     # render the page with the updated data
     return render_template("history.html", history=searches(), message="Data updated!")
@@ -364,5 +358,4 @@ def logout():
 
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(debug=True)
