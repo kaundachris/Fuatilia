@@ -6,8 +6,7 @@
 """
 
 #import dependencies
-import psycopg2
-import psycopg2.extras
+import sqlite3
 import os
 from flask import session
 
@@ -17,37 +16,34 @@ from stockdata import Stock
 
 # create a database connection
 def get_db():
-    # environment variable used to protect the actual database location from attackers
-    connection = psycopg2.connect(os.environ["DATABASE_URL"])
+    # create or open the database connection
+    connection = sqlite3.connect(os.path.join(os.path.dirname(__file__), "fundamentals.db"))
 
-    # commit any changes automatically
-    connection.autocommit = True
+    # return rows as dictionary-like objects for easy parsing
+    connection.row_factory = sqlite3.Row
 
     return connection
 
 
 # create the database with all the fields needed
 def initialize_db():
-    # open connection to database
-    connection = get_db()
-
-    with connection.cursor() as db:
+    with get_db() as db:
         # create the users table
         db.execute("""CREATE TABLE IF NOT EXISTS users(
-                id SERIAL PRIMARY KEY,
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                 username TEXT NOT NULL UNIQUE,
                 password_hash TEXT NOT NULL)
                 """)
 
         # create the history table
         db.execute("""CREATE TABLE IF NOT EXISTS searches(
-                id SERIAL PRIMARY KEY,
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                 user_id INTEGER NOT NULL,
                 ticker TEXT NOT NULL,
                 long_name TEXT NOT NULL,
                 industry TEXT NOT NULL,
                 forward_pe REAL,
-                book_value Real,
+                book_value REAL,
                 earnings_growth REAL,
                 profit_margins REAL,
                 market_cap REAL,
@@ -58,9 +54,12 @@ def initialize_db():
                 FOREIGN KEY(user_id) REFERENCES users(id),
                 UNIQUE(user_id, long_name)
                 )""")
-    
-    # close connection to database
-    connection.close()
+
+        # commit changes to the database
+        db.commit()
+
+    # close the connection
+    db.close() 
 
 
 # retreive stock data and store in a usable format
@@ -98,16 +97,20 @@ def retrieve_stock_data(ticker: str):
 
 # store data in database
 def store_data(data: dict):
-    # store this in the database
-    connection = get_db()
-    with connection.cursor(cursor_factory=psycopg2.extras.DictCursor) as db:
-        db.execute("DELETE FROM searches WHERE long_name = %s AND user_id = %s",
+    # store data passed to the function in the database
+    with get_db() as db:
+        db.execute("DELETE FROM searches WHERE long_name = ? AND user_id = ?",
                 (data["long_name"], session["user_id"]))
         db.execute('''INSERT INTO searches (user_id, ticker, long_name, industry, forward_pe, earnings_growth, profit_margins, market_cap, book_value, price_book, quick_ratio, current_ratio, free_cashflow)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)''',
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
                 (session["user_id"], data["ticker"], data["long_name"], data["industry"], data["forward_pe"], data["earnings_growth"], data["profit_margins"], data["market_cap"],
                     data["book_value"], data["price_book"], data["quick_ratio"], data["current_ratio"], data["free_cashflow"]))
-    connection.close()
+
+        # commit changes
+        db.commit()
+
+    # close the connection
+    db.close()
 
 
 # to determine which link to show in the navigation (login, logout, register)
@@ -165,20 +168,17 @@ def searches(sort_by=None, order="ASC"):
         order = "ASC"
 
     #connect to database
-    connection = get_db()
-
-    with connection.cursor(cursor_factory=psycopg2.extras.DictCursor) as db:
+    with get_db() as db:
         # get searches related to the user id
         if sort_by:
             # if sort parameter present, sort the results
-            query = f"SELECT * FROM searches WHERE user_id = %s ORDER BY {sort_by} {order} NULLS LAST"
-            db.execute(query, (session["user_id"],))
+            query = f"SELECT * FROM searches WHERE user_id = ? ORDER BY {sort_by} {order}"
+            results = db.execute(query, (session["user_id"],)).fetchall()
         else:
             # if search parameter missing, return results as is
-            db.execute("SELECT * FROM searches WHERE user_id = %s", (session["user_id"],))
-        searches = db.fetchall()
+            results = db.execute("SELECT * FROM searches WHERE user_id = ?", (session["user_id"],)).fetchall()
 
-        # close connection to database
-        connection.close()
+    # close the connection
+    db.close()
 
-        return searches
+    return results
