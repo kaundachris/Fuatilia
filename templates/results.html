@@ -32,7 +32,7 @@
 {% endblock %}
 
 {% block main %}
-<h1>Company: {{ stock_data.long_name }}</h1>
+<h1>{{ stock_data.long_name }}</h1>
 
 <div>
     {{ stock_data.price_chart | safe }}
