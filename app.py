@@ -5,7 +5,7 @@ from flask import Flask, render_template, request, redirect, session
 import bcrypt
 import os
 
-from helpers import get_db, initialize_db, retrieve_stock_data, store_data, check_password, status, searches
+from helpers import get_db, initialize_db, retrieve_stock_data, store_data, check_password, status, searches, store_last_search
 
 
 # initialize the app
@@ -38,7 +38,7 @@ def index():
     # retrieve the data
     stock_data = retrieve_stock_data(company)
 
-    # check that data is retrived successfully 
+    # check that data is retrieved successfully 
     if stock_data is None:
         return render_template("index.html", message="Could not find the ticker's data. Please make sure you enter a valid ticker!", logged_in=status())
 
@@ -92,26 +92,18 @@ def login():
             session["login_counter"] += 1
             return render_template("login.html", message="Invalid username or password!")
 
-        
-
         # Set user_id in session after successful login
+        last_ticker = session.get("last_ticker")
         session.clear()
         session["user_id"] = user["id"]
+        if last_ticker:
+            session["last_ticker"] = last_ticker
 
     # close the connection
     db.close()
     
     # store the user's last search
-    stock = session.get("last_ticker")
-
-    # Store the user's last search - if available - in their database
-    if stock:
-        # retrieve its data
-        stock_data = retrieve_stock_data(stock)
-    
-        # store this in the database
-        if stock_data:
-            store_data(stock_data)
+    store_last_search()
     
     return redirect("/history")
     
@@ -171,14 +163,7 @@ def register():
     db.close()
 
     # Store the user's search - if available - in their database
-    stock = session.get("last_ticker")
-    if stock:
-        # retrieve its data
-        stock_data = retrieve_stock_data(stock)
-    
-        # store this in the database
-        if stock_data:
-            store_data(stock_data)
+    store_last_search()
 
     return redirect("/history")
 
@@ -238,14 +223,7 @@ def reset():
     db.close()
 
     # Store the user's search - if available - in their database
-    stock = session.get("last_ticker")
-    if stock:
-        # retrieve its data
-        stock_data = retrieve_stock_data(stock)
-    
-        # store this in the database
-        if stock_data:
-            store_data(stock_data)
+    store_last_search()
 
     return redirect("/history")
 

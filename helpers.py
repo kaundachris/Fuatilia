@@ -182,3 +182,16 @@ def searches(sort_by=None, order="ASC"):
     db.close()
 
     return results
+
+# store the user's last search
+def store_last_search():
+    stock = session.get("last_ticker")
+
+    # Store the user's last search - if available - in their database
+    if stock:
+        # retrieve its data
+        stock_data = retrieve_stock_data(stock)
+    
+        # store this in the database
+        if stock_data:
+            store_data(stock_data)
