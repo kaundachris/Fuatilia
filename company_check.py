@@ -6,14 +6,14 @@ class CompanyLookup():
         If company exists, it returns the ticker of the company
         If it doesn't, it returns None
     """
-    def __init__(self):
-        # Reduces the number of API calls by storing any searches made
-        self.COMPANY_TICKERS = {
-            "google": "GOOGL",
-            "apple": "AAPL",
-            "tesla": "TSLA",
-            "nvidia": "NVDA"
-        }
+
+    # Reduces the number of API calls by storing any searches made
+    COMPANY_TICKERS = {
+        "google": "GOOGL",
+        "apple": "AAPL",
+        "tesla": "TSLA",
+        "nvidia": "NVDA"
+    }
 
     # check for existence of company
     def company_exists(self, company_name: str):
