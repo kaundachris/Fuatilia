@@ -12,56 +12,56 @@ class Stock():
     def __init__(self, ticker:str):
         # ticker is the persistent item of the class
         self.ticker = ticker
+        self._stock = None
         self._info = None
-        self._prices = None
+        self._data = None
+
+    #set the property so that the stock is called and stored into cache - reduces the calls to the API
+    @property
+    def stock(self):
+        # if stock already exists, cache it to reduce API calls
+        if self._stock is not None:
+            return self._stock
+
+        # cache the stock
+        self._stock = Ticker(self.ticker)
+
+        return self._stock
+
+    #set the property so that the data is called and stored into cache - reduces the calls to the API
+    @property
+    def data(self):
+        # if stock data already exists, cache it to reduce API calls
+        if self._data is not None:
+            return self._data
+        
+        # first, call the API for data; store data, if any
+        data = self.stock.history(period="1y")
+
+        # if no data, raise ValueError.
+        if data.empty:
+            raise ValueError(f"Data for {self.ticker} could not be found")
+
+        # cache the data
+        self._data = data
+
+        return self._data
 
     #set the property so that the data is called and stored into cache - reduces the calls to the API
     @property
     def info(self):
-        # if stockdata already exists, cache it to reduce API calls
+        # if stock info already exists, cache it to reduce API calls
         if self._info is not None:
             return self._info
-
-        # checks for data
-        # first, call the API for data
-        stock = Ticker(self.ticker)
-
-        # store data, if any
-        data = stock.history(period="1d")
         
-        # if no data, raise ValueError. 
-        if data.empty:
+        # if no info, raise ValueError.
+        if self.data.empty:
             raise ValueError(f"Data for {self.ticker} could not be found")
         
-        # set the data as a property of the object
-        self._info = stock.info
+        # cache the info
+        self._info = self.stock.info
 
-        # return the property
         return self._info
-    
-    #set the property so that the data is called and stored into cache - reduces the calls to the API
-    @property
-    def prices(self):
-        # if stockdata already exists, cache it to reduce API calls
-        if self._prices is not None:
-            return self._prices
-
-        # checks for data
-        # first, call the API for data
-        stock = Ticker(self.ticker)
-
-        # store data, if any
-        data = stock.history(period="1y")
-        
-        # if no data, raise ValueError. 
-        if data.empty:
-            raise ValueError(f"Data for {self.ticker} could not be found")
-        
-        # set the data as a property of the object
-        self._prices = data
-
-        # return the property
-        return self._prices
 
     # Repeated pattern of accessing information on stock ofloaded to this function
     def get_info(self, key):
@@ -153,9 +153,8 @@ class Stock():
     # render the price chart
     @property
     def price_chart(self):
-        data = self.prices
-
         # render only the closing prices
+        data = self.data
         graph = px.line(data, x=data.index, y = "Close")
 
         # update the graph to match the design of the page
@@ -177,7 +176,7 @@ class Stock():
             yaxis=dict(gridcolor="#333333", linecolor="#FAEBD7", zerolinecolor="#333333"),
         )
         
-        # set the color of the graph to blue for clear visibility
+        # set the color of the graph to blue for better visibility/differentiation
         graph.update_traces(line_color="#0A88B3")
 
         return graph.to_html(full_html=False, include_plotlyjs='cdn')
