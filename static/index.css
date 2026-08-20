@@ -58,7 +58,7 @@ input[name="submit"] {
     transition: background-color 0.2s ease;
 }
 
-input[name="sort"] {
+input[name="sort"], input[name="search_result"] {
     border: none;
     color:antiquewhite;
     background-color:rgb(30, 30, 30);

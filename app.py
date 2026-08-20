@@ -2,17 +2,23 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from flask import Flask, render_template, request, redirect, session
-import bcrypt
 import os
+from stock_data import StockData
 
-from helpers import get_db, initialize_db, retrieve_stock_data, store_data, check_password, status, searches, store_last_search
 
+def status():
+    '''
+        Checks if the user is logged in or not
+    '''
+    if "user_id" in session:
+        return True
+    else:
+        return False
+    
 
 # initialize the app
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY")
-initialize_db()
-
 
 # jinja will use this to format numbers into currency
 @app.template_filter("currency")
@@ -35,307 +41,46 @@ def index():
     if not company:
         return render_template("index.html", message="No ticker entered. Please enter a valid ticker!", logged_in=status())
 
-    # retrieve the data
-    stock_data = retrieve_stock_data(company)
+    # check that data is retrieved successfully
+    try:
+        search_results = StockData().search_results(company)
 
-    # check that data is retrieved successfully 
-    if stock_data is None:
+    except ValueError:
         return render_template("index.html", message="Could not find the ticker's data. Please make sure you enter a valid ticker!", logged_in=status())
 
+    return render_template("search.html", search_results=search_results, logged_in=status())
+
+
+@app.route("/company", methods=["GET", "POST"])
+def company():
+    # if just landing on page
+    if request.method == "GET":
+        return render_template("company.html", logged_in=status())
+
+    # get the user's input
+    symbol = request.form.get("company")
+
+    # check that user input is not empty
+    if not symbol:
+        return render_template("company.html", message="Select the name or symbol of a company from the results", logged_in=status())
+
+    # check that profile data is retrieved successfully
+    try:
+        company = StockData(symbol)
+        profile = company.profile()
+        prices = company.prices()
+        income_statements = company.income_statements()
+        balance_sheets = company.balance_sheets
+        ratios = company.financial_ratios()
+
+
+    except ValueError:
+        return render_template("company.html", message="Could not find the ticker's data. Please make sure you enter a valid ticker!", logged_in=status())
+
     # store the search data
-    session["last_ticker"] = stock_data["ticker"]
+    session["last_symbol"] = symbol
 
-    return render_template("results.html", stock_data=stock_data, logged_in=status())
-
-
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    # if from other pages
-    if request.method == "GET":
-        return render_template("login.html")
-    
-    # get the user's login counter
-    # if the login counter hasn't been set, set it to zero
-    if not session.get("login_counter"):
-        session["login_counter"] = 0
-
-    # set the disabled parameter to false
-    disabled = False
-
-    # if the counter is two, disable the fields
-    if session["login_counter"] == 2:
-        disabled = True
-        return render_template("login.html", message="Contact support", disabled=disabled)
-
-    # check that username field is not empty
-    username = request.form.get("username")
-    if not username:
-        return render_template("login.html", message="Please enter your username!")
-    username = username.lower()
-
-    # check that the password field is not empty
-    password = request.form.get("password")
-    if not password:
-        return render_template("login.html", message="Please enter your username and password!")
-
-    # check that the username and password exist in database
-    with get_db() as db:
-        user = db.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
-
-        # check for existence of username
-        if not user:
-            session["login_counter"] += 1
-            return render_template("login.html", message="Invalid username or password!")
-
-        # check that the password matches
-        if not bcrypt.checkpw(password.encode("utf-8"), user["password_hash"].encode("utf-8")):
-            session["login_counter"] += 1
-            return render_template("login.html", message="Invalid username or password!")
-
-        # Set user_id in session after successful login
-        last_ticker = session.get("last_ticker")
-        session.clear()
-        session["user_id"] = user["id"]
-        if last_ticker:
-            session["last_ticker"] = last_ticker
-
-    # close the connection
-    db.close()
-    
-    # store the user's last search
-    store_last_search()
-    
-    return redirect("/history")
-    
-
-@app.route("/register", methods=["GET", "POST"])
-def register():
-    # if from other pages
-    if request.method == "GET":
-        return render_template("register.html")
-
-    # check that username field is not empty
-    username = request.form.get("username")
-    if not username:
-        return render_template("register.html", message="Please enter your username!")
-    username = username.lower()
-
-    # check that the password field is not empty
-    password = request.form.get("password")
-    if not password:
-        return render_template("register.html", message="Please enter a password!")
-
-    # check that the confirm password field is not empty
-    confirm_password = request.form.get("confirm_password")
-    if not confirm_password:
-        return render_template("register.html", message="Please confirm your password!")
-
-    # Check that password is at least 6 characters long and contains letters, digits and characters
-    if not check_password(password):
-        return render_template("register.html", message="Must contain at least one number and one letter")
-
-    # check that the passwords match
-    if password != confirm_password:
-        return render_template("register.html", message="Passwords don't match")
-
-    with get_db() as db:
-        # check that the username does not exist in database
-        user = db.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
-        if user:
-            return render_template("register.html", message="Username exists! Log in please.")
-
-        # hash the password
-        hash_pw = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
-
-        # add the user to the database
-        db.execute("INSERT INTO users (username, password_hash) VALUES (?, ?)",
-                (username, hash_pw.decode("utf-8")))
-
-        # get user's id
-        user = db.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
-
-        # Check that user has data
-        if user:
-            # Set user_id in session after successful login
-            session["user_id"] = user["id"]
-
-    # close the connection
-    db.close()
-
-    # Store the user's search - if available - in their database
-    store_last_search()
-
-    return redirect("/history")
-
-
-@app.route("/reset", methods=["GET", "POST"])
-def reset():
-    # if from other pages
-    if request.method == "GET":
-        return render_template("reset.html")
-
-    # check that username field is not empty
-    username = request.form.get("username")
-    if not username:
-        return render_template("reset.html", message="Please enter your username!")
-    username = username.lower()
-
-    # check that the password field is not empty
-    password = request.form.get("password")
-    if not password:
-        return render_template("reset.html", message="Please enter a password!")
-
-    # check that the confirm password field is not empty
-    confirm_password = request.form.get("confirm_password")
-    if not confirm_password:
-        return render_template("reset.html", message="Please confirm your password!")
-
-    # Check that password is at least 6 characters long and contains letters, digits and characters
-    if not check_password(password):
-        return render_template("reset.html", message="Must contain at least one number and one letter")
-
-    # check that the passwords match
-    if password != confirm_password:
-        return render_template("reset.html", message="Passwords don't match")
-
-    with get_db() as db:
-        # Ensure that the username exists in database
-        user = db.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
-        if not user:
-            return render_template("reset.html", message="Username does not exist")
-
-        # hash the password
-        hash_pw = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
-
-        # add the new password to the user's database
-        db.execute("UPDATE users SET password_hash = ? WHERE username = ?",
-                (hash_pw.decode("utf-8"), username))
-
-        # get user's id
-        user = db.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
-
-        # Check that user has data
-        if user:
-            # Set user_id in session after successful login
-            session["user_id"] = user["id"]
-
-    # close the connection
-    db.close()
-
-    # Store the user's search - if available - in their database
-    store_last_search()
-
-    return redirect("/history")
-
-
-@app.route("/history", methods=["GET", "POST"])
-def history():
-    # check that the user is logged in
-    if "user_id" not in session:
-        return redirect("/login")
-
-    if request.method == "GET":
-        # populate the page
-        return render_template("history.html", history=searches())
-
-    # get the stock stored in the session
-    stock = session.get("last_ticker")
-    if not stock:
-        return render_template("history.html", history=searches())
-
-    # retrieve its data
-    stock_data = retrieve_stock_data(stock)
-    if not stock_data:
-        return render_template("history.html", history=searches(), message="Could not find the ticker's data. Please make sure you enter a valid ticker!")
-
-    # store this in the database
-    store_data(stock_data)
-
-    # render the page with the new entry
-    return render_template("history.html", history=searches())
-
-
-@app.route("/update", methods=["POST"])
-def update():
-    # check that the user is logged in
-    if "user_id" not in session:
-        return redirect("/login")
-
-    # get the id of the stock to update
-    stock_to_update = request.form.get("update")
-    if not stock_to_update:
-        return render_template("history.html", history=searches(), message="Update failed. Please try again")
-
-    # retrieve the data
-    stock_data = retrieve_stock_data(stock_to_update)
-    if stock_data is None:
-        return render_template("history.html", history=searches(), message="Could not find the ticker's data. Please make sure you enter a valid ticker!")
-
-    session["last_ticker"] = stock_to_update
-
-    # store this in the database
-    store_data(stock_data)
-
-    # render the page with the new entry
-    return render_template("history.html", history=searches(), message="Data updated!")
-
-
-@app.route("/delete", methods=["POST"])
-def delete():
-    # check that the user is logged in
-    if "user_id" not in session:
-        return redirect("/login")
-
-    # get the id of the stock to delete
-    stock_to_delete = request.form.get("delete")
-    if not stock_to_delete:
-        return render_template("history.html", history=searches(), message="Delete failed. Please try again")
-
-    # delete the stock data
-    with get_db() as db:
-        db.execute("DELETE FROM searches WHERE ticker = ? AND user_id = ?",
-                (stock_to_delete, session["user_id"]))
-
-    # close the connection
-    db.close()
-
-    # render the page with the updated data
-    return render_template("history.html", history=searches(), message="Data updated!")
-
-
-@app.route("/sort", methods=["POST"])
-def sort():
-    # check that the user is logged in
-    if "user_id" not in session:
-        return redirect("/login")
-
-    # get the id of the stock to update
-    sort_by = request.form.get("sort")
-    if not sort_by:
-        return render_template("history.html", history=searches(), message="Sort failed. Please try again")
-    
-    #retrive the current order 
-    current_order = session.get("order")
-
-    # If order is ascending, switch to descending
-    if current_order == "ASC":
-        session["order"] = "DESC"
-
-    #if order is NONE or descending, switch to ascending     
-    else:
-        session["order"] = "ASC"
-
-    # render the page with the sorted data 
-    return render_template("history.html", history=searches(sort_by=sort_by, order=session["order"]), message="Data updated!")
-
-
-@app.route("/logout", methods=["GET", "POST"])
-def logout():
-    # clear the session data
-    session.clear()
-
-    # redirect to the login page
-    return redirect("/login")
+    return render_template("company.html", profile=profile, prices=prices, income_statements=income_statements, balance_sheets=balance_sheets, ratios=ratios ,logged_in=status())
 
 
 if __name__ == "__main__":

@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block header %}
+<div class="top">
+    <h1>Fuatilia</h1>
+
+    <div class="nav">
+        {% if logged_in %}
+        <form action="/logout" method="get">
+            <input name="login" id="login" hidden>
+            <input type="submit" name="submit" id="submit" value="Log Out">
+        </form>
+
+        <form action="/" method="get">
+            <input name="search" id="search" hidden>
+            <input type="submit" name="submit" id="submit" value="Search">
+        </form>
+
+        {% else %}
+        <form action="/login" method="get">
+            <input name="login" id="login" hidden>
+            <input type="submit" name="submit" id="submit" value="Log In">
+        </form>
+
+        <form action="/register" method="get">
+            <input name="register" id="register" hidden>
+            <input type="submit" name="submit" id="submit" value="Register">
+        </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block main %}
+    <h1>Search Results</h1>
+
+    <i class="more_info">Click on the name or symbol of your desired search</i>
+
+    <table>
+        <thead>
+            <tr>
+                <td><strong>Name</strong></td>
+                <td><strong>Symbol</strong></td>
+                <td><strong>Currency</strong></td>
+                <td><strong>Exchange</strong></td>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for result in search_results %}
+                <tr>
+                    <td>
+                        <div>
+                            <form action="/company" method="post">
+                                <input name="company" id="company" hidden value="{{ result.symbol }}">
+                                <button type="submit" name="submit" id="submit">{{ result.name }}</button>
+                            </form>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <form action="/company" method="post">
+                                <input name="company" id="company" hidden value="{{ result.symbol }}">
+                                <button type="submit" name="submit" id="submit">{{ result.symbol }}</button>
+                            </form>
+                        </div>
+                    </td>
+                    <td>{{ result.currency }}</td>
+                    <td>{{ result.exchange }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
