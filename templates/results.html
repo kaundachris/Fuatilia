@@ -32,120 +32,39 @@
 {% endblock %}
 
 {% block main %}
-<h1>{{ stock_data.long_name }}</h1>
+    <h1>{{ profile.companyName }}</h1>
 
-<div>
-    {{ stock_data.price_chart | safe }}
-</div>
+    <table>
+        <tbody>
+            <tr>
+                <td>Symbol</td>
+                <td>{{ profile.symbol }}</td>
+            </tr>
 
-<table>
-    <thead>
-        <tr>
-            <td><strong>Item</strong></td>
-            <td><strong>Detail</strong></td>
-            <td><strong>Notes</strong></td>
-        </tr>
-    </thead>
+            <tr>
+                <td>Currency</td>
+                <td>{{ profile.currency }}</td>
+            </tr>
 
-    <tbody>
-        <tr>
-            <td>Industry</td>
-            <td>{{ stock_data.industry }}</td>
-            <td style="text-align: left; padding: 10px;">This company operates in the {{ stock_data.industry }} industry
-            </td>
-        </tr>
+            <tr>
+                <td>Market Cap</td>
+                <td>{{ profile.marketCap | currency }}</td>
+            </tr>
 
-        <tr>
-            <td>Market Capitalization</td>
-            <td>{{ stock_data.market_cap | currency }}</td>
-            <td style="text-align: left; padding: 10px;">Not necessarily an important number, but good to know. Compare
-                this number to other companies in the
-                industry to determine if this is good or bad.</td>
-        </tr>
+            <tr>
+                <td>exchange</td>
+                <td>{{ profile.exchange }}</td>
+            </tr>
 
-        <tr>
-            <td>Price to Earnings ratio</td>
-            <td>{{ stock_data.forward_pe }}</td>
-            <td style="text-align: left; padding: 10px;">It will take the company {{ stock_data.forward_pe }} years to
-                earn (per share) the equivalent of
-                the price paid for your shares. <br> If this number is negative, the company is actually making losses!
-            </td>
-        </tr>
+            <tr>
+                <td>Industry</td>
+                <td>{{ profile.industry }}</td>
+            </tr>
 
-        <tr>
-            <td>Earnings Growth</td>
-            <td>{{ stock_data.earnings_growth }}%</td>
-            <td style="text-align: left; padding: 10px;">Compare this number to other companies in the industry to
-                determine if this is good or bad.</td>
-        </tr>
-
-        <tr>
-            <td>Profit Margin</td>
-            <td>{{ stock_data.profit_margins }}%</td>
-            <td style="text-align: left; padding: 10px;">This means that for every $100 the company makes, it keeps {{
-                stock_data.profit_margins | currency }}. The rest is eaten up by expenses.
-            </td>
-        </tr>
-
-        <tr>
-            <td>Book Value</td>
-            <td>{{ stock_data.book_value }}</td>
-            <td style="text-align: left; padding: 10px;">Important in comparison to the market capitalization. Read next
-                note for more context!</td>
-        </tr>
-
-        <tr>
-            <td>Price to Book Ratio</td>
-            <td>{{ stock_data.price_book }}</td>
-            <td style="text-align: left; padding: 10px;">For every $100 dollars you pay for the company's stock, you get
-                actual backed assets worth
-                {% if stock_data.price_book != 0 %}
-                {{ (100 / (stock_data.price_book | float)) | currency }}
-                {% else %}
-                {{ 0 | currency }}
-                {% endif %}
-            </td>
-        </tr>
-
-        <tr>
-            <td>Quick Ratio</td>
-            <td>{{ stock_data.quick_ratio }}</td>
-            <td style="text-align: left; padding: 10px;">If above 1, the company can pay out it's short term debts
-                without
-                having to sell any short term assets - a good thing. </td>
-        </tr>
-
-        <tr>
-            <td>Current Ratio</td>
-            <td>{{ stock_data.current_ratio }}</td>
-            <td style="text-align: left; padding: 10px;">If above 1, the company can pay out it's short term debts
-                without
-                having to sell any long term assets.</td>
-        </tr>
-
-        <tr>
-            <td>Free Cashflow</td>
-            <td>{{ stock_data.free_cashflow | currency }}</td>
-            <td style="text-align: left; padding: 10px;">This is the money left over after the company pays its:
-                <ol>
-                    <li>Operating expenses — such as mortgage or rent, payroll, property taxes and inventory costs, and
-                    </li>
-                    <li>Capital expenditures (CapEx) - such as equipment,
-                        technology and real estate.</li>
-                </ol>
-                <br>
-                Free cash flow can be used to invest in growing the business, paying down debt or paying dividends to
-                owners and shareholders.
-                <br>
-                <br>
-                If negative, the company has no money left over to return to stockholders
-            </td>
-        </tr>
-    </tbody>
-</table>
-
-<form action="/history" method="post">
-    <input type="text" name="history" id="history" hidden>
-    <input type="submit" name="submit" id="submit" value="Add to Portfolio">
-</form>
+            <tr>
+                <td>Country</td>
+                <td>{{ profile.country }}</td>
+            </tr>
+        </tbody>
+    </table>
 {% endblock %}
