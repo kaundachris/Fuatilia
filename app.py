@@ -64,23 +64,48 @@ def company():
     if not symbol:
         return render_template("company.html", message="Select the name or symbol of a company from the results", logged_in=status())
 
+    # set the symbol
+    company = StockData(symbol)
+
     # check that profile data is retrieved successfully
     try:
-        company = StockData(symbol)
         profile = company.profile()
-        prices = company.prices()
-        income_statements = company.income_statements()
-        balance_sheets = company.balance_sheets
-        ratios = company.financial_ratios()
-
 
     except ValueError:
-        return render_template("company.html", message="Could not find the ticker's data. Please make sure you enter a valid ticker!", logged_in=status())
+        profile = None
+
+    # check that price data is retrieved successfully
+    try:
+        prices = company.prices()
+
+    except ValueError:
+        prices = None
+
+    # check that income statement data is retrieved successfully
+    try:
+        income_statements = company.income_statements()
+
+    except ValueError:
+        income_statements = None
+
+    # check that balance sheet data is retrieved successfully
+    try:
+        balance_sheets = company.balance_sheets()
+
+    except ValueError:
+        balance_sheets = None
+
+    # check that ratio data is retrieved successfully
+    try:
+        ratios = company.financial_ratios()
+
+    except ValueError:
+        ratios = None
 
     # store the search data
     session["last_symbol"] = symbol
 
-    return render_template("company.html", profile=profile, prices=prices, income_statements=income_statements, balance_sheets=balance_sheets, ratios=ratios ,logged_in=status())
+    return render_template("company.html", profile=profile, prices=prices, income_statements=income_statements, balance_sheets=balance_sheets, ratios=ratios, logged_in=status())
 
 
 if __name__ == "__main__":

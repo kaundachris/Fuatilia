@@ -180,3 +180,8 @@ class StockData():
 
         # return the result
         return ratio_data
+
+
+berkshire = StockData("AAPL").balance_sheets()
+for item in berkshire:
+    print(item)
