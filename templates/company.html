@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block header %}
+<div class="top">
+    <h1>Fuatilia</h1>
+
+    <div class="nav">
+        {% if logged_in %}
+        <form action="/logout" method="get">
+            <input name="login" id="login" hidden>
+            <input type="submit" name="submit" id="submit" value="Log Out">
+        </form>
+
+        <form action="/" method="get">
+            <input name="search" id="search" hidden>
+            <input type="submit" name="submit" id="submit" value="Search">
+        </form>
+
+        {% else %}
+        <form action="/login" method="get">
+            <input name="login" id="login" hidden>
+            <input type="submit" name="submit" id="submit" value="Log In">
+        </form>
+
+        <form action="/register" method="get">
+            <input name="register" id="register" hidden>
+            <input type="submit" name="submit" id="submit" value="Register">
+        </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block main %}
+    <h1>{{ profile.companyName }}</h1>
+
+    <table>
+        <tbody>
+            <tr>
+                <td>Symbol</td>
+                <td>{{ profile.symbol }}</td>
+            </tr>
+
+            <tr>
+                <td>Currency</td>
+                <td>{{ profile.currency }}</td>
+            </tr>
+
+            <tr>
+                <td>Market Cap</td>
+                <td>{{ profile.marketCap | currency }}</td>
+            </tr>
+
+            <tr>
+                <td>exchange</td>
+                <td>{{ profile.exchange }}</td>
+            </tr>
+
+            <tr>
+                <td>Industry</td>
+                <td>{{ profile.industry }}</td>
+            </tr>
+
+            <tr>
+                <td>Country</td>
+                <td>{{ profile.country }}</td>
+            </tr>
+        </tbody>
+    </table>
+{% endblock %}
