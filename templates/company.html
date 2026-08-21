@@ -33,39 +33,39 @@
 
 {% block main %}
 
-    {% if profile %}
-        <h1>{{ profile.companyName }}</h1>
+    {% if profile_data %}
+        <h1>{{ profile_data.companyName }}</h1>
 
         <table>
             <tbody>
                 <tr>
                     <td>Symbol</td>
-                    <td>{{ profile.symbol }}</td>
+                    <td>{{ profile_data.symbol }}</td>
                 </tr>
 
                 <tr>
                     <td>Currency</td>
-                    <td>{{ profile.currency }}</td>
+                    <td>{{ profile_data.currency }}</td>
                 </tr>
 
                 <tr>
-                    <td>Market Cap</td>
-                    <td>{{ profile.marketCap | currency }}</td>
+                    <td>Market Capitalization</td>
+                    <td>{{ profile_data.marketCap | currency }}</td>
                 </tr>
 
                 <tr>
-                    <td>exchange</td>
-                    <td>{{ profile.exchange }}</td>
+                    <td>Exchange</td>
+                    <td>{{ profile_data.exchange }}</td>
                 </tr>
 
                 <tr>
                     <td>Industry</td>
-                    <td>{{ profile.industry }}</td>
+                    <td>{{ profile_data.industry }}</td>
                 </tr>
 
                 <tr>
                     <td>Country</td>
-                    <td>{{ profile.country }}</td>
+                    <td>{{ profile_data.country }}</td>
                 </tr>
             </tbody>
         </table>
@@ -74,5 +74,10 @@
         <p>Profile data unavailable for this company.</p>
         
     {% endif %}
+
+    <form action="/" method="get">
+        <input name="index" id="index" hidden>
+        <input type="submit" name="submit" id="submit" value="New Search">
+    </form>
 
 {% endblock %}
