@@ -1,20 +1,10 @@
 from dotenv import load_dotenv
 load_dotenv()
 
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, session
 import os
 from stock_data import StockData
-
-
-def status():
-    '''
-        Checks if the user is logged in or not
-    '''
-    if "user_id" in session:
-        return True
-    else:
-        return False
-    
+from helpers import status, retrieve_data
 
 # initialize the app
 app = Flask(__name__)
@@ -39,14 +29,14 @@ def index():
 
     # check that user input is not empty
     if not company:
-        return render_template("index.html", message="No ticker entered. Please enter a valid ticker!", logged_in=status())
+        return render_template("index.html", message="Please enter the name of the company you want to search!", logged_in=status())
 
     # check that data is retrieved successfully
     try:
         search_results = StockData().search_results(company)
 
     except ValueError:
-        return render_template("index.html", message="Could not find the ticker's data. Please make sure you enter a valid ticker!", logged_in=status())
+        return render_template("index.html", message="Could not find results for the company you entered. Make sure the name is correct.", logged_in=status())
 
     return render_template("search.html", search_results=search_results, logged_in=status())
 
@@ -64,48 +54,13 @@ def company():
     if not symbol:
         return render_template("company.html", message="Select the name or symbol of a company from the results", logged_in=status())
 
-    # set the symbol
-    company = StockData(symbol)
-
-    # check that profile data is retrieved successfully
-    try:
-        profile = company.profile()
-
-    except ValueError:
-        profile = None
-
-    # check that price data is retrieved successfully
-    try:
-        prices = company.prices()
-
-    except ValueError:
-        prices = None
-
-    # check that income statement data is retrieved successfully
-    try:
-        income_statements = company.income_statements()
-
-    except ValueError:
-        income_statements = None
-
-    # check that balance sheet data is retrieved successfully
-    try:
-        balance_sheets = company.balance_sheets()
-
-    except ValueError:
-        balance_sheets = None
-
-    # check that ratio data is retrieved successfully
-    try:
-        ratios = company.financial_ratios()
-
-    except ValueError:
-        ratios = None
+    # retrieve the data
+    data = retrieve_data(symbol)    
 
     # store the search data
     session["last_symbol"] = symbol
 
-    return render_template("company.html", profile=profile, prices=prices, income_statements=income_statements, balance_sheets=balance_sheets, ratios=ratios, logged_in=status())
+    return render_template("company.html", **data, logged_in=status())
 
 
 if __name__ == "__main__":
