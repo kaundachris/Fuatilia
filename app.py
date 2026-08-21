@@ -4,7 +4,7 @@ load_dotenv()
 from flask import Flask, render_template, request, session
 import os
 from stock_data import StockData
-from helpers import status, retrieve_data
+from helpers import status
 
 # initialize the app
 app = Flask(__name__)
@@ -33,7 +33,7 @@ def index():
 
     # check that data is retrieved successfully
     try:
-        search_results = StockData().search_results(company)
+        search_results = StockData().search(company)
 
     except ValueError:
         return render_template("index.html", message="Could not find results for the company you entered. Make sure the name is correct.", logged_in=status())
@@ -55,7 +55,7 @@ def company():
         return render_template("company.html", message="Select the name or symbol of a company from the results", logged_in=status())
 
     # retrieve the data
-    data = retrieve_data(symbol)    
+    data = StockData(symbol).fetch_data()    
 
     # store the search data
     session["last_symbol"] = symbol
