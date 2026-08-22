@@ -22,22 +22,57 @@ def initialize_db():
                 password_hash TEXT NOT NULL
                 )""")
 
-        # # store data on all companies searched
-        # db.execute("""CREATE TABLE IF NOT EXISTS companies(
-        #         id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-        #         symbol TEXT NOT NULL,
-        #         UNIQUE(symbol)
-        #         )""")
+        # store data on all companies searched
+        db.execute("""CREATE TABLE IF NOT EXISTS companies(
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                symbol TEXT NOT NULL,
+                UNIQUE(symbol)
+                )""")
 
-        # # create a portfolio table - what each user has searched
-        # db.execute("""CREATE TABLE IF NOT EXISTS portfolio(
-        #         id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-        #         user_id INTEGER NOT NULL,
-        #         company_id INTEGER NOT NULL,
-        #         FOREIGN KEY(user_id) REFERENCES users(id),
-        #         FOREIGN KEY(company_id) REFERENCES company(id),
-        #         UNIQUE(user_id, company_id)
-        #         )""")
+        # create a portfolio table - what each user has searched
+        db.execute("""CREATE TABLE IF NOT EXISTS portfolios(
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                user_id INTEGER NOT NULL,
+                company_id INTEGER NOT NULL,
+                FOREIGN KEY(user_id) REFERENCES users(id),
+                FOREIGN KEY(company_id) REFERENCES companies(id),
+                UNIQUE(user_id, company_id)
+                )""")
+
+        # create the company profiles table
+        db.execute("""CREATE TABLE IF NOT EXISTS company_profiles(
+                company_id INTEGER PRIMARY KEY,
+                data TEXT NOT NULL,
+                FOREIGN KEY(company_id) REFERENCES companies(id)
+                )""")
+
+        # create the income statements table
+        db.execute("""CREATE TABLE IF NOT EXISTS income_statements(
+                company_id INTEGER PRIMARY KEY,
+                data TEXT NOT NULL,
+                FOREIGN KEY(company_id) REFERENCES companies(id)
+                )""")
+
+        # create the balance sheets table
+        db.execute("""CREATE TABLE IF NOT EXISTS balance_sheets(
+                company_id INTEGER PRIMARY KEY,
+                data TEXT NOT NULL,
+                FOREIGN KEY(company_id) REFERENCES companies(id)
+                )""")
+
+        # create the cashflow statements table
+        db.execute("""CREATE TABLE IF NOT EXISTS cashflows(
+                company_id INTEGER PRIMARY KEY,
+                data TEXT NOT NULL,
+                FOREIGN KEY(company_id) REFERENCES companies(id)
+                )""")
+
+        # create the financial ratios table
+        db.execute("""CREATE TABLE IF NOT EXISTS ratios(
+                company_id INTEGER PRIMARY KEY,
+                data TEXT NOT NULL,
+                FOREIGN KEY(company_id) REFERENCES companies(id)
+                )""")
 
         # commit changes to the database
         db.commit()
