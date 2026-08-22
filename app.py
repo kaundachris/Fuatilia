@@ -76,7 +76,7 @@ def register():
     # Store the user's search - if available - in their database
     # store_last_search()
 
-    return redirect("/")
+    return redirect("/portfolio")
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -124,11 +124,11 @@ def login():
             return render_template("login.html", message="Invalid username or password!")
 
         # Set user_id in session after successful login
-        last_ticker = session.get("last_ticker")
+        last_symbol = session.get("last_symbol")
         session.clear()
         session["user_id"] = user["id"]
-        if last_ticker:
-            session["last_ticker"] = last_ticker
+        if last_symbol:
+            session["last_symbol"] = last_symbol
 
     # close the connection
     db.close()
@@ -136,7 +136,7 @@ def login():
     # store the user's last search
     # store_last_search()
     
-    return redirect("/")
+    return redirect("/portfolio")
 
 
 @app.route("/reset", methods=["GET", "POST"])
@@ -196,7 +196,7 @@ def reset():
     # store the user's search - if available - in their database
     # store_last_search()
 
-    return redirect("/")
+    return redirect("/portfolio")
 
 
 @app.route("/logout", methods=["GET", "POST"])
@@ -251,6 +251,33 @@ def company():
     session["last_symbol"] = symbol
 
     return render_template("company.html", **data, logged_in=status())
+
+
+@app.route("/portfolio", methods=["GET", "POST"])
+def portfolio():
+    # check that the user is logged in
+    if "user_id" not in session:
+        return redirect("/login")
+
+    if request.method == "GET":
+        # populate the page
+        return render_template("portfolio.html", history=searches())
+
+    # get the symbol stored in the session
+    symbol = session.get("last_symbol")
+    if not symbol:
+        return render_template("portfolio.html", history=searches())
+
+    # retrieve its data
+    data = StockData(symbol).package_data()
+    if not data:
+        return render_template("history.html", history=searches(), message="Could not find the symbol's data. Please make sure you enter a valid symbol!")
+
+    # store this in the database
+    store_data(data)
+
+    # render the page with the new entry
+    return render_template("history.html", history=searches())
 
 
 if __name__ == "__main__":
