@@ -132,7 +132,7 @@ class StockData():
 
 
     def package_data(self):
-        """Returns the company dat in the rquired format for app.py"""
+        """Returns the company data in the required format for app.py"""
 
         # Gets the profile data
         profile_data = self.fetch_data(self.PROFILE_ENDPOINT)

@@ -124,5 +124,74 @@ def register():
     return redirect("/")
 
 
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    # if from other pages
+    if request.method == "GET":
+        return render_template("login.html")
+    
+    # get the user's login counter
+    # if the login counter hasn't been set, set it to zero
+    if not session.get("login_counter"):
+        session["login_counter"] = 0
+
+    # set the disabled parameter to false
+    disabled = False
+
+    # if the counter is two, disable the fields
+    if session["login_counter"] == 2:
+        disabled = True
+        return render_template("login.html", message="Contact support", disabled=disabled)
+
+    # check that username field is not empty
+    username = request.form.get("username")
+    if not username:
+        return render_template("login.html", message="Please enter your username!")
+    username = username.lower()
+
+    # check that the password field is not empty
+    password = request.form.get("password")
+    if not password:
+        return render_template("login.html", message="Please enter your username and password!")
+
+    # check that the username and password exist in database
+    with get_db() as db:
+        user = db.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
+
+        # check for existence of username
+        if not user:
+            session["login_counter"] += 1
+            return render_template("login.html", message="Invalid username or password!")
+
+        # check that the password matches
+        if not bcrypt.checkpw(password.encode("utf-8"), user["password_hash"].encode("utf-8")):
+            session["login_counter"] += 1
+            return render_template("login.html", message="Invalid username or password!")
+
+        # Set user_id in session after successful login
+        last_ticker = session.get("last_ticker")
+        session.clear()
+        session["user_id"] = user["id"]
+        if last_ticker:
+            session["last_ticker"] = last_ticker
+
+    # close the connection
+    db.close()
+    
+    # store the user's last search
+    # store_last_search()
+    
+    return redirect("/")
+
+
+@app.route("/logout", methods=["GET", "POST"])
+def logout():
+    # clear the session data
+    session.clear()
+
+    # redirect to the login page
+    return redirect("/login")
+
+
 if __name__ == "__main__":
     app.run(debug=os.environ.get("FLASK_DEBUG") == "1")
