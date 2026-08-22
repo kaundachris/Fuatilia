@@ -1,5 +1,5 @@
 from flask import session
-import os, sqlite3
+import os, sqlite3, json
 
 
 def get_db():
@@ -37,13 +37,6 @@ def initialize_db():
                 FOREIGN KEY(user_id) REFERENCES users(id),
                 FOREIGN KEY(company_id) REFERENCES companies(id),
                 UNIQUE(user_id, company_id)
-                )""")
-
-        # create the company profiles table
-        db.execute("""CREATE TABLE IF NOT EXISTS company_profiles(
-                company_id INTEGER PRIMARY KEY,
-                data TEXT NOT NULL,
-                FOREIGN KEY(company_id) REFERENCES companies(id)
                 )""")
 
         # create the income statements table
@@ -111,3 +104,53 @@ def check_password(password):
         if has_digit and has_letter:
             return True
     return False
+
+
+def store_data(data, symbol):
+    """stores data of a saved company in the database"""
+
+    # extract the data
+    income_data = data["income_data"]
+    balance_sheet_data = data["balance_sheet_data"]
+    cashflow_data = data["cashflow_data"]
+    ratio_data = data["ratio_data"]
+
+    with get_db() as db:
+        # add the company to the companies table
+        db.execute('''INSERT OR IGNORE INTO companies (symbol)
+            VALUES (?)''',
+            (symbol,))
+
+        # get the company id to use in storing the other attributes
+        company_id = db.execute("SELECT id FROM companies WHERE symbol = ?", (symbol,)).fetchone()
+        company_id = company_id["id"]
+
+        # add the income statements to the income statements table
+        if income_data:
+            db.execute('''INSERT OR REPLACE INTO income_statements (company_id, data)
+                VALUES (?, ?)''',
+                (company_id, json.dumps(income_data)))
+
+        # add the balance sheets to the balance sheets table
+        if balance_sheet_data:
+            db.execute('''INSERT OR REPLACE INTO balance_sheets (company_id, data)
+                VALUES (?, ?)''',
+                (company_id, json.dumps(balance_sheet_data)))
+        
+        # add the cashflow statements to the cashflows table
+        if cashflow_data:
+            db.execute('''INSERT OR REPLACE INTO cashflows (company_id, data)
+                VALUES (?, ?)''',
+                (company_id, json.dumps(cashflow_data)))
+        
+        # add the ratio data to the ratios table
+        if ratio_data:
+            db.execute('''INSERT OR REPLACE INTO ratios (company_id, data)
+                VALUES (?, ?)''',
+                (company_id, json.dumps(ratio_data)))
+
+        # commit changes
+        db.commit()
+
+    # close the connection
+    db.close()
