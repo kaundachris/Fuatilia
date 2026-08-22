@@ -19,51 +19,6 @@ def currency(value):
     return "{:,.2f}".format(value)
 
 
-@app.route("/", methods=["GET", "POST"])
-def index():
-    # if just landing on page
-    if request.method == "GET":
-        return render_template("index.html", logged_in=status())
-
-    # get the user's input
-    company = request.form.get("user_input")
-
-    # check that user input is not empty
-    if not company:
-        return render_template("index.html", message="Please enter the name of the company you want to search!", logged_in=status())
-
-    # check that data is retrieved successfully
-    try:
-        search_results = StockData().search(company)
-
-    except ValueError:
-        return render_template("index.html", message="Could not find results for the company you entered. Make sure the name is correct.", logged_in=status())
-
-    return render_template("search.html", search_results=search_results, logged_in=status())
-
-
-@app.route("/company", methods=["GET", "POST"])
-def company():
-    # if just landing on page
-    if request.method == "GET":
-        return render_template("company.html", logged_in=status())
-
-    # get the user's input
-    symbol = request.form.get("company")
-
-    # check that user input is not empty
-    if not symbol:
-        return render_template("company.html", message="Select the name or symbol of a company from the results", logged_in=status())
-
-    # retrieve the data
-    data = StockData(symbol).package_data()    
-
-    # store the search data
-    session["last_symbol"] = symbol
-
-    return render_template("company.html", **data, logged_in=status())
-
-
 @app.route("/register", methods=["GET", "POST"])
 def register():
     # if from other pages
@@ -184,6 +139,66 @@ def login():
     return redirect("/")
 
 
+@app.route("/reset", methods=["GET", "POST"])
+def reset():
+    # if from other pages
+    if request.method == "GET":
+        return render_template("reset.html")
+
+    # check that username field is not empty
+    username = request.form.get("username")
+    if not username:
+        return render_template("reset.html", message="Please enter your username!")
+    username = username.lower()
+
+    # check that the password field is not empty
+    password = request.form.get("password")
+    if not password:
+        return render_template("reset.html", message="Please enter a password!")
+
+    # check that the confirm password field is not empty
+    confirm_password = request.form.get("confirm_password")
+    if not confirm_password:
+        return render_template("reset.html", message="Please confirm your password!")
+
+    # Check that password is at least 6 characters long and contains letters, digits and characters
+    if not check_password(password):
+        return render_template("reset.html", message="Must contain at least one number and one letter")
+
+    # check that the passwords match
+    if password != confirm_password:
+        return render_template("reset.html", message="Passwords don't match")
+
+    with get_db() as db:
+        # Ensure that the username exists in database
+        user = db.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
+        if not user:
+            return render_template("reset.html", message="Username does not exist")
+
+        # hash the password
+        hash_pw = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+
+        # add the new password to the user's database
+        db.execute("UPDATE users SET password_hash = ? WHERE username = ?",
+                (hash_pw.decode("utf-8"), username))
+
+        # get user's id
+        user = db.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
+
+        # Check that user has data
+        if user:
+            # Set user_id in session after successful login
+            session["user_id"] = user["id"]
+
+    # close the connection
+    db.close()
+
+    # store the user's search - if available - in their database
+    # store_last_search()
+
+    return redirect("/")
+
+
 @app.route("/logout", methods=["GET", "POST"])
 def logout():
     # clear the session data
@@ -191,6 +206,51 @@ def logout():
 
     # redirect to the login page
     return redirect("/login")
+
+
+@app.route("/", methods=["GET", "POST"])
+def index():
+    # if just landing on page
+    if request.method == "GET":
+        return render_template("index.html", logged_in=status())
+
+    # get the user's input
+    company = request.form.get("user_input")
+
+    # check that user input is not empty
+    if not company:
+        return render_template("index.html", message="Please enter the name of the company you want to search!", logged_in=status())
+
+    # check that data is retrieved successfully
+    try:
+        search_results = StockData().search(company)
+
+    except ValueError:
+        return render_template("index.html", message="Could not find results for the company you entered. Make sure the name is correct.", logged_in=status())
+
+    return render_template("search.html", search_results=search_results, logged_in=status())
+
+
+@app.route("/company", methods=["GET", "POST"])
+def company():
+    # if just landing on page
+    if request.method == "GET":
+        return render_template("company.html", logged_in=status())
+
+    # get the user's input
+    symbol = request.form.get("company")
+
+    # check that user input is not empty
+    if not symbol:
+        return render_template("company.html", message="Select the name or symbol of a company from the results", logged_in=status())
+
+    # retrieve the data
+    data = StockData(symbol).package_data()    
+
+    # store the search data
+    session["last_symbol"] = symbol
+
+    return render_template("company.html", **data, logged_in=status())
 
 
 if __name__ == "__main__":
