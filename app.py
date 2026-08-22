@@ -4,7 +4,7 @@ load_dotenv()
 from flask import Flask, render_template, request, session, redirect
 import os, bcrypt
 from stock_data import StockData
-from helpers import get_db, initialize_db, status, check_password
+from helpers import get_db, initialize_db, status, check_password, store_data
 
 # initialize the app
 app = Flask(__name__)
@@ -73,8 +73,11 @@ def register():
     # close the connection
     db.close()
 
-    # Store the user's search - if available - in their database
-    # store_last_search()
+    # store the user's search - if available - in their database
+    symbol = session.get("last_symbol")
+    if symbol:
+        data = StockData(symbol).package_data()
+        store_data(data, symbol)
 
     return redirect("/portfolio")
 
@@ -133,8 +136,11 @@ def login():
     # close the connection
     db.close()
     
-    # store the user's last search
-    # store_last_search()
+    # store the user's search - if available - in their database
+    symbol = session.get("last_symbol")
+    if symbol:
+        data = StockData(symbol).package_data()
+        store_data(data, symbol)
     
     return redirect("/portfolio")
 
@@ -194,7 +200,10 @@ def reset():
     db.close()
 
     # store the user's search - if available - in their database
-    # store_last_search()
+    symbol = session.get("last_symbol")
+    if symbol:
+        data = StockData(symbol).package_data()
+        store_data(data, symbol)
 
     return redirect("/portfolio")
 
@@ -271,13 +280,13 @@ def portfolio():
     # retrieve its data
     data = StockData(symbol).package_data()
     if not data:
-        return render_template("history.html", history=searches(), message="Could not find the symbol's data. Please make sure you enter a valid symbol!")
+        return render_template("portfolio.html", history=searches(), message="Could not find the symbol's data. Please make sure you enter a valid symbol!")
 
     # store this in the database
-    store_data(data)
+    store_data(data, symbol)
 
     # render the page with the new entry
-    return render_template("history.html", history=searches())
+    return render_template("portfolio.html", history=searches())
 
 
 if __name__ == "__main__":
