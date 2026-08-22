@@ -2,6 +2,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import requests, os
+import pandas as pd
+import plotly.express as px
 
 
 class StockData():
@@ -74,50 +76,83 @@ class StockData():
         return us_results
     
 
-    def fetch_data(self):
+    def fetch_data(self, endpoint):
         """fetches the required data for the symbol"""
 
-        # Gets the profile data
+        # Get the data
         try:
-            link = self.build_query(self.PROFILE_ENDPOINT)
-            profile_data = self.api_call(link, self.symbol)[0]
+            link = self.build_query(endpoint)
+            fetched_data = self.api_call(link, self.symbol)
         except ValueError:
-            profile_data = None
+            fetched_data = None
+
+        return fetched_data
+
+
+    def price_chart(self):
+        """render the price chart (closing prices)"""
 
         # Gets the price data
-        try:
-            link = self.build_query(self.PRICES_ENDPOINT)
-            price_data = self.api_call(link, self.symbol)
-        except ValueError:
-            price_data = None
+        price_data = self.fetch_data(self.PRICES_ENDPOINT)
+
+        # set price data to none if API returned nothing
+        if not price_data:
+            return None
+
+        # load into a dataframe - offers safer handling
+        df = pd.DataFrame(price_data)
+
+        # convert date (string) to datetime object -reduces bugs
+        df["date"] = pd.to_datetime(df["date"])
+        graph = px.line(df, x="date", y ="price")
+
+        # update the graph to match the design of the page
+        graph.update_layout(
+            # set background to black - like the html
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+
+            # set font color to antiquewhite - like the html
+            font_color="#FAEBD7",
+
+            # set font to the page's family
+            font_family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif",
+            
+            # set the vertical gridlines to grey and the graph boundary to white
+            xaxis=dict(gridcolor="#333333", linecolor="#FAEBD7", zerolinecolor="#333333"),
+
+            # set the horizontal gridlines to grey and the graph boundary to white
+            yaxis=dict(gridcolor="#333333", linecolor="#FAEBD7", zerolinecolor="#333333"),
+        )
+        
+        # set the color of the graph to blue for better visibility/differentiation
+        graph.update_traces(line_color="#0A88B3")
+
+        return graph.to_html(full_html=False, include_plotlyjs='cdn')
+
+
+    def package_data(self):
+        # Gets the profile data
+        profile_data = self.fetch_data(self.PROFILE_ENDPOINT)
+        if profile_data:
+            profile_data = profile_data[0]
+
+        # Gets the price data
+        price_data = self.price_chart()
 
         # Gets the income data
-        try:
-            link = self.build_query(self.INCOME_STATEMENT_ENDPOINT)
-            income_data = self.api_call(link, self.symbol)
-        except ValueError:
-            income_data = None
+        income_data = self.fetch_data(self.INCOME_STATEMENT_ENDPOINT)
 
         # Gets the balance sheet data
-        try:
-            link = self.build_query(self.BALANCE_SHEET_ENDPOINT)
-            balance_sheet_data = self.api_call(link, self.symbol)
-        except ValueError:
-            balance_sheet_data = None
+        balance_sheet_data = self.fetch_data(self.BALANCE_SHEET_ENDPOINT)
 
         # Gets the cashflow data
-        try:
-            link = self.build_query(self.CASHFLOW_ENDPOINT)
-            cashflow_data = self.api_call(link, self.symbol)
-        except ValueError:
-            cashflow_data = None
+        cashflow_data = self.fetch_data(self.CASHFLOW_ENDPOINT)
 
         # Gets the ratio data
-        try:
-            link = self.build_query(self.RATIOS_ENDPOINT)
-            ratio_data = self.api_call(link, self.symbol)
-        except ValueError:
-            ratio_data = None
+        ratio_data = self.fetch_data(self.RATIOS_ENDPOINT)
+        if ratio_data:
+            ratio_data = ratio_data[0]
 
         data = {
                 "profile_data": profile_data,
