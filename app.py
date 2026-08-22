@@ -15,7 +15,7 @@ app.secret_key = os.environ.get("SECRET_KEY")
 def currency(value):
     if value is None:
         return ""
-    return "${:,.2f}".format(value)
+    return "{:,.2f}".format(value)
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -55,7 +55,7 @@ def company():
         return render_template("company.html", message="Select the name or symbol of a company from the results", logged_in=status())
 
     # retrieve the data
-    data = StockData(symbol).fetch_data()    
+    data = StockData(symbol).package_data()    
 
     # store the search data
     session["last_symbol"] = symbol
