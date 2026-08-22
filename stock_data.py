@@ -128,10 +128,12 @@ class StockData():
         # set the color of the graph to blue for better visibility/differentiation
         graph.update_traces(line_color="#0A88B3")
 
-        return graph.to_html(full_html=False, include_plotlyjs='cdn')
+        return graph.to_html(full_html=False, include_plotlyjs="cdn")
 
 
     def package_data(self):
+        """Returns the company dat in the rquired format for app.py"""
+
         # Gets the profile data
         profile_data = self.fetch_data(self.PROFILE_ENDPOINT)
         if profile_data:
