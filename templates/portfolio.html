@@ -97,17 +97,36 @@
     <tbody>
         {% for company in portfolio %}
         <tr>
+            <td>
+                <div>
+                    <form action="/company" method="post">
+                        <input name="company" id="company" hidden value="{{ company.company_name }}">
+                        <button type="submit" name="submit" id="submit">{{ company.company_name }}</button>
+                    </form>
+                </div>
+            </td>
 
-            company_name, company_symbol, price_earnings, price_book,
-                operating_profit_margin, dividend_yield, current_ratio, debt_equity
-            <td>{{ company.company_name }}</td>
-            <td>{{ company.company_symbol }}</td>
+            <td>
+                <div>
+                    <form action="/company" method="post">
+                        <input name="company" id="company" hidden value="{{ company.company_symbol }}">
+                        <button type="submit" name="submit" id="submit">{{ company.company_symbol }}</button>
+                    </form>
+                </div>
+            </td>
+
             <td>{{ company.price_earnings | currency }}</td>
+
             <td>{{ company.price_book | currency }}</td>
+
             <td>{{ company.operating_profit_margin | currency }}</td>
+
             <td>{{ company.dividend_yield | currency }}</td>
+
             <td>{{ company.current_ratio | currency }}</td>
+
             <td>{{ company.debt_equity | currency }}</td>
+
             <td style="padding: 5px;">
                 <div style="display:flex; align-items:center; gap:8px; margin: 5px; padding: 5px;">
                     <form action="/delete" method="post">
