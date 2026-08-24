@@ -4,7 +4,7 @@ load_dotenv()
 from flask import Flask, render_template, request, session, redirect
 import os, bcrypt
 from stock_data import StockData
-from helpers import get_db, initialize_db, status, check_password, store_data
+from helpers import get_db, initialize_db, status, check_password, store_data, user_portfolio
 
 # initialize the app
 app = Flask(__name__)
@@ -270,23 +270,72 @@ def portfolio():
 
     if request.method == "GET":
         # populate the page
-        return render_template("portfolio.html", history=searches())
+        return render_template("portfolio.html", portfolio=user_portfolio())
 
     # get the symbol stored in the session
     symbol = session.get("last_symbol")
     if not symbol:
-        return render_template("portfolio.html", history=searches())
+        return render_template("portfolio.html", portfolio=user_portfolio())
 
     # retrieve its data
     data = StockData(symbol).package_data()
     if not data:
-        return render_template("portfolio.html", history=searches(), message="Could not find the symbol's data. Please make sure you enter a valid symbol!")
+        return render_template("portfolio.html", portfolio=user_portfolio(), message="Could not find the symbol's data. Please make sure you enter a valid symbol!")
 
     # store this in the database
     store_data(data, symbol)
 
     # render the page with the new entry
-    return render_template("portfolio.html", history=searches())
+    return render_template("portfolio.html", portfolio=user_portfolio())
+
+
+@app.route("/delete", methods=["POST"])
+def delete():
+    # check that the user is logged in
+    if "user_id" not in session:
+        return redirect("/login")
+
+    # get the id of the stock to delete
+    stock_to_delete = request.form.get("delete")
+    if not stock_to_delete:
+        return render_template("portfolio.html", portfolio=user_portfolio(), message="Delete failed. Please try again")
+
+    # delete the stock data
+    with get_db() as db:
+        db.execute("DELETE FROM portfolios WHERE company_symbol = ? AND user_id = ?",
+                (stock_to_delete, session["user_id"]))
+
+    # close the connection
+    db.close()
+
+    # render the page with the updated data
+    return render_template("portfolio.html", portfolio=user_portfolio(), message="Data updated!")
+
+
+@app.route("/sort", methods=["POST"])
+def sort():
+    # check that the user is logged in
+    if "user_id" not in session:
+        return redirect("/login")
+
+    # get the id of the stock to update
+    sort_by = request.form.get("sort")
+    if not sort_by:
+        return render_template("portfolio.html", portfolio=user_portfolio(), message="Sort failed. Please try again")
+    
+    #retrive the current order 
+    current_order = session.get("order")
+
+    # If order is ascending, switch to descending
+    if current_order == "ASC":
+        session["order"] = "DESC"
+
+    #if order is NONE or descending, switch to ascending     
+    else:
+        session["order"] = "ASC"
+
+    # render the page with the sorted data 
+    return render_template("portfolio.html", portfolio=user_portfolio(sort_by=sort_by, order=session["order"]), message="Data updated!")
 
 
 if __name__ == "__main__":

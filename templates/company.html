@@ -54,7 +54,7 @@
 
     <h3>Summary</h3>
 
-    <div>
+    <div class="company">
         {% if profile_data %}
             <table>
                 <tbody>
@@ -94,9 +94,7 @@
             <p>Profile data unavailable for this company.</p>
             
         {% endif %}
-    </div>
     
-    <div>
         {% if ratio_data %}
             <table>
                 <tbody>
@@ -138,15 +136,16 @@
         {% endif %}
     </div>
     
+    <div class="company">
+        <form action="/" method="get">
+            <input name="index" id="index" hidden>
+            <input type="submit" name="submit" id="submit" value="New Search">
+        </form>
 
-    <form action="/" method="get">
-        <input name="index" id="index" hidden>
-        <input type="submit" name="submit" id="submit" value="New Search">
-    </form>
-
-    <form action="/portfolio" method="get">
-        <input name="portfolio" id="portfolio" hidden>
-        <input type="submit" name="submit" id="submit" value="Add to portfolio">
-    </form>
+        <form action="/portfolio" method="post">
+            <input name="portfolio" id="portfolio" hidden>
+            <input type="submit" name="submit" id="submit" value="Add to portfolio">
+        </form>
+    </div>
 
 {% endblock %}

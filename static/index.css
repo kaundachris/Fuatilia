@@ -31,7 +31,7 @@ main {
     color:rgb(10, 136, 179);
 }
 
-.nav {
+.nav, .company {
     display: flex;
     justify-content: space-between;
 }

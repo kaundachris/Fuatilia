@@ -31,46 +31,47 @@
     <thead>
         <tr>
             <td><strong>Company</strong></td>
+
+            <td>
+                <strong>Symbol</strong>
+            </td>
+
             <td>
                 <strong>
                     <form action="/sort" method="post">
-                        <input name="sort" id="sort" hidden value="forward_pe">
-                        <input type="submit" name="sort" id="sort" value="Price Earnings">
+                        <input name="sort" id="sort" hidden value="price_earnings">
+                        <input type="submit" name="sort" id="sort" value="Price to Earnings">
                     </form>
                 </strong>
             </td>
-            <td>
-                <strong>
-                    <form action="/sort" method="post">
-                        <input name="sort" id="sort" hidden value="earnings_growth">
-                        <input type="submit" name="sort" id="sort" value="Earnings Growth">
-                    </form>
-                </strong>
-            </td>
-            <td>
-                <strong>
-                    <form action="/sort" method="post">
-                        <input name="sort" id="sort" hidden value="profit_margins">
-                        <input type="submit" name="sort" id="sort" value="Profit Margin">
-                    </form>
-                </strong>
-            </td>
+
             <td>
                 <strong>
                     <form action="/sort" method="post">
                         <input name="sort" id="sort" hidden value="price_book">
-                        <input type="submit" name="sort" id="sort" value="PB Value">
+                        <input type="submit" name="sort" id="sort" value="Price to Book">
                     </form>
                 </strong>
             </td>
+
             <td>
                 <strong>
                     <form action="/sort" method="post">
-                        <input name="sort" id="sort" hidden value="quick_ratio">
-                        <input type="submit" name="sort" id="sort" value="Quick Ratio">
+                        <input name="sort" id="sort" hidden value="operating_profit_margin">
+                        <input type="submit" name="sort" id="sort" value="Profit Margin">
                     </form>
                 </strong>
             </td>
+
+            <td>
+                <strong>
+                    <form action="/sort" method="post">
+                        <input name="sort" id="sort" hidden value="dividend_yield">
+                        <input type="submit" name="sort" id="sort" value="Dividend Yield">
+                    </form>
+                </strong>
+            </td>
+
             <td>
                 <strong>
                     <form action="/sort" method="post">
@@ -79,40 +80,38 @@
                     </form>
                 </strong>
             </td>
+
             <td>
                 <strong>
                     <form action="/sort" method="post">
-                        <input name="sort" id="sort" hidden value="free_cashflow">
-                        <input type="submit" name="sort" id="sort" value="Free Cashflow">
+                        <input name="sort" id="sort" hidden value="debt_equity">
+                        <input type="submit" name="sort" id="sort" value="Debt to Equity">
                     </form>
                 </strong>
             </td>
-            <td><strong>Update/Delete</strong></td>
+
+            <td><strong>Delete</strong></td>
         </tr>
     </thead>
 
     <tbody>
-        {% for company in history %}
+        {% for company in portfolio %}
         <tr>
-            <td>{{ company.long_name }}</td>
-            <td>{{ company.forward_pe }}</td>
-            <td>{{ company.earnings_growth }}</td>
-            <td>{{ company.profit_margins }}</td>
-            <td>{{ company.price_book }}</td>
-            <td>{{ company.quick_ratio }}</td>
-            <td>{{ company.current_ratio }}</td>
-            <td>{{ company.free_cashflow | currency }}</td>
+
+            company_name, company_symbol, price_earnings, price_book,
+                operating_profit_margin, dividend_yield, current_ratio, debt_equity
+            <td>{{ company.company_name }}</td>
+            <td>{{ company.company_symbol }}</td>
+            <td>{{ company.price_earnings | currency }}</td>
+            <td>{{ company.price_book | currency }}</td>
+            <td>{{ company.operating_profit_margin | currency }}</td>
+            <td>{{ company.dividend_yield | currency }}</td>
+            <td>{{ company.current_ratio | currency }}</td>
+            <td>{{ company.debt_equity | currency }}</td>
             <td style="padding: 5px;">
                 <div style="display:flex; align-items:center; gap:8px; margin: 5px; padding: 5px;">
-                    <form action="/update" method="post">
-                        <input name="update" id="update" hidden value="{{ company.ticker }}">
-                        <button type="submit" name="submit" id="submit">
-                            <i class="material-icons">refresh</i>
-                        </button>
-                    </form>
-
                     <form action="/delete" method="post">
-                        <input name="delete" id="delete" hidden value="{{ company.ticker }}">
+                        <input name="delete" id="delete" hidden value="{{ company.company_symbol }}">
                         <button type="submit" name="submit" id="submit">
                             <i class="material-icons">delete</i>
                         </button>
