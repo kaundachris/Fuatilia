@@ -29,11 +29,19 @@ def initialize_db():
                 UNIQUE(symbol)
                 )""")
 
-        # create a portfolio table - what each user has searched
+        # create a portfolio table (what each user has searched)
         db.execute("""CREATE TABLE IF NOT EXISTS portfolios(
                 id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                 user_id INTEGER NOT NULL,
                 company_id INTEGER NOT NULL,
+                company_name TEXT NOT NULL,
+                company_symbol TEXT NOT NULL,
+                price_earnings REAL,
+                price_book REAL,
+                operating_profit_margin REAL,
+                dividend_yield REAL,
+                current_ratio REAL,
+                debt_equity REAL,
                 FOREIGN KEY(user_id) REFERENCES users(id),
                 FOREIGN KEY(company_id) REFERENCES companies(id),
                 UNIQUE(user_id, company_id)
@@ -110,6 +118,7 @@ def store_data(data, symbol):
     """stores data of a saved company in the database"""
 
     # extract the data
+    profile_data = data["profile_data"]
     income_data = data["income_data"]
     balance_sheet_data = data["balance_sheet_data"]
     cashflow_data = data["cashflow_data"]
@@ -124,6 +133,21 @@ def store_data(data, symbol):
         # get the company id to use in storing the other attributes
         company_id = db.execute("SELECT id FROM companies WHERE symbol = ?", (symbol,)).fetchone()
         company_id = company_id["id"]
+        user_id = session["user_id"]
+
+        # add search to the portfolio table
+        if profile_data:
+            # if ratio data missing, coerce it into an empty dict
+            if ratio_data is None:
+                ratio_data = {}
+
+            db.execute('''INSERT OR REPLACE INTO portfolios 
+                (user_id, company_id, company_name, company_symbol, price_earnings, price_book,
+                operating_profit_margin, dividend_yield, current_ratio, debt_equity)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                (user_id, company_id, profile_data["companyName"], profile_data["symbol"], ratio_data.get("priceToEarningsRatio"),
+                 ratio_data.get("priceToBookRatio"), ratio_data.get("operatingProfitMargin"), ratio_data.get("dividendYieldPercentage"),
+                 ratio_data.get("currentRatio"), ratio_data.get("debtToEquityRatio")))
 
         # add the income statements to the income statements table
         if income_data:
@@ -154,3 +178,45 @@ def store_data(data, symbol):
 
     # close the connection
     db.close()
+
+
+def user_portfolio(sort_by=None, order="ASC"):
+    """gets all the user search data to populate the portfolio page"""
+
+    # ensure user is logged in
+    if "user_id" not in session:
+        return []
+    
+    # whitelist of sortable columns (prevents SQL injection)
+    valid_columns = [
+        "price_earnings", "price_book", "operating_profit_margin",
+        "dividend_yield", "current_ratio", "debt_equity"
+    ]
+
+    # whitelist of allowable orders (prevents SQL injection)
+    valid_orders = ["ASC", "DESC"]
+
+
+    # validate the sort item selected
+    if sort_by not in valid_columns:
+        sort_by = None
+
+    # set the order item to "ASC" always
+    if order not in valid_orders:
+        order = "ASC"
+
+    #connect to database
+    with get_db() as db:
+        # get searches related to the user id
+        if sort_by:
+            # if sort parameter present, sort the results
+            query = f"SELECT * FROM portfolios WHERE user_id = ? ORDER BY {sort_by} {order}"
+            results = db.execute(query, (session["user_id"],)).fetchall()
+        else:
+            # if search parameter missing, return results as is
+            results = db.execute("SELECT * FROM portfolios WHERE user_id = ?", (session["user_id"],)).fetchall()
+
+    # close the connection
+    db.close()
+
+    return results
