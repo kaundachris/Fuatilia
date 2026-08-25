@@ -3,6 +3,7 @@ load_dotenv()
 
 from flask import Flask, render_template, request, session, redirect
 import os, bcrypt
+from jinja2 import Undefined
 from stock_data import StockData
 from helpers import get_db, initialize_db, status, check_password, store_financial_statements, update_user_portfolio, retrieve_user_portfolio
 
@@ -14,7 +15,7 @@ initialize_db()
 # jinja will use this to format numbers into currency
 @app.template_filter("currency")
 def currency(value):
-    if value is None:
+    if value is None or isinstance(value, Undefined):
         return ""
     return "{:,.2f}".format(value)
 
@@ -88,19 +89,18 @@ def login():
     # if from other pages
     if request.method == "GET":
         return render_template("login.html")
-    
-    # get the user's login counter
+
     # if the login counter hasn't been set, set it to zero
     if not session.get("login_counter"):
         session["login_counter"] = 0
 
-    # set the disabled parameter to false
-    disabled = False
-
-    # if the counter is two, disable the fields
-    if session["login_counter"] == 2:
+    # if the counter is two or greater, disable the fields
+    if session["login_counter"] >= 2:
         disabled = True
         return render_template("login.html", message="Contact support", disabled=disabled)
+
+    # set the disabled parameter to false
+    disabled = False
 
     # check that username field is not empty
     username = request.form.get("username")

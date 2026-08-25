@@ -27,7 +27,7 @@ main {
     padding: 10px;
 }
 
-.more_info {
+.more_info, .label, .key {
     color:rgb(10, 136, 179);
 }
 
@@ -118,6 +118,10 @@ tr:nth-child(odd) {
 
 .value {
     width: 60%;
+}
+
+.key {
+    width: 15%;
 }
 
 /*footer styling*/
