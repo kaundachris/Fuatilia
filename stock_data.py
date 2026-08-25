@@ -1,9 +1,10 @@
 from dotenv import load_dotenv
 load_dotenv()
 
-import requests, os
+import requests, os, json
 import pandas as pd
 import plotly.express as px
+from helpers import needs_refresh, get_db, store_financial_statements
 
 
 class StockData():
@@ -142,19 +143,78 @@ class StockData():
         # Gets the price data
         price_data = self.price_chart()
 
-        # Gets the income data
-        income_data = self.fetch_data(self.INCOME_STATEMENT_ENDPOINT)
+        if needs_refresh(self.symbol):
+            # Gets the income data
+            income_data = self.fetch_data(self.INCOME_STATEMENT_ENDPOINT)
 
-        # Gets the balance sheet data
-        balance_sheet_data = self.fetch_data(self.BALANCE_SHEET_ENDPOINT)
+            # Gets the balance sheet data
+            balance_sheet_data = self.fetch_data(self.BALANCE_SHEET_ENDPOINT)
 
-        # Gets the cashflow data
-        cashflow_data = self.fetch_data(self.CASHFLOW_ENDPOINT)
+            # Gets the cashflow data
+            cashflow_data = self.fetch_data(self.CASHFLOW_ENDPOINT)
 
-        # Gets the ratio data
-        ratio_data = self.fetch_data(self.RATIOS_ENDPOINT)
-        if ratio_data:
-            ratio_data = ratio_data[0]
+            # Gets the ratio data
+            ratio_data = self.fetch_data(self.RATIOS_ENDPOINT)
+            if ratio_data:
+                ratio_data = ratio_data[0]
+
+            data = {
+                    "profile_data": profile_data,
+                    "price_data": price_data,
+                    "income_data": income_data,
+                    "balance_sheet_data": balance_sheet_data,
+                    "cashflow_data": cashflow_data,
+                    "ratio_data": ratio_data
+                    }
+    
+            return data
+
+        rewrite = False
+
+        with get_db() as db:
+            # get the company's id
+            company_id = db.execute("SELECT id FROM companies WHERE symbol = ?", (self.symbol,)).fetchone()
+            company_id = company_id["id"]
+
+            # Gets the income data from the database
+            income_data = db.execute("SELECT data FROM income_statements WHERE company_id = ?", (company_id,)).fetchone()
+            if income_data:
+                income_data = json.loads(income_data["data"])
+            else:
+                # otherwise, fetch the data
+                income_data = self.fetch_data(self.INCOME_STATEMENT_ENDPOINT)
+                rewrite = True
+
+            # Gets the balance sheet data from the database
+            balance_sheet_data = db.execute("SELECT data FROM balance_sheets WHERE company_id = ?", (company_id,)).fetchone()
+            if balance_sheet_data:
+                balance_sheet_data = json.loads(balance_sheet_data["data"])
+            else:
+                # otherwise, fetch the data
+                balance_sheet_data = self.fetch_data(self.BALANCE_SHEET_ENDPOINT)
+                rewrite = True
+
+            # Gets the cashflow data from the database
+            cashflow_data = db.execute("SELECT data FROM cashflows WHERE company_id = ?", (company_id,)).fetchone()
+            if cashflow_data:
+                cashflow_data = json.loads(cashflow_data["data"])
+            else:
+                # otherwise, fetch the data
+                cashflow_data = self.fetch_data(self.CASHFLOW_ENDPOINT)
+                rewrite = True
+                   
+            # Gets the ratio data from the database
+            ratio_data = db.execute("SELECT data FROM ratios WHERE company_id = ?", (company_id,)).fetchone()
+            if ratio_data:
+                ratio_data = json.loads(ratio_data["data"])
+            else:
+                # otherwise, fetch the data
+                ratio_data = self.fetch_data(self.RATIOS_ENDPOINT)
+                if ratio_data:
+                    ratio_data = ratio_data[0]
+                rewrite = True
+        
+        db.close()
 
         data = {
                 "profile_data": profile_data,
@@ -164,5 +224,9 @@ class StockData():
                 "cashflow_data": cashflow_data,
                 "ratio_data": ratio_data
                 }
+
+        # if new data was called, store the data
+        if rewrite:
+            store_financial_statements(data, self.symbol)
 
         return data

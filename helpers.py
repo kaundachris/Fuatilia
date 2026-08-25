@@ -1,5 +1,6 @@
 from flask import session
 import os, sqlite3, json
+from datetime import date
 
 
 def get_db():
@@ -26,6 +27,7 @@ def initialize_db():
         db.execute("""CREATE TABLE IF NOT EXISTS companies(
                 id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                 symbol TEXT NOT NULL,
+                date_created DATE,
                 UNIQUE(symbol)
                 )""")
 
@@ -114,40 +116,27 @@ def check_password(password):
     return False
 
 
-def store_data(data, symbol):
-    """stores data of a saved company in the database"""
+def store_financial_statements(data, symbol):
+    """stores financial statements of a searched company in the database"""
 
     # extract the data
-    profile_data = data["profile_data"]
     income_data = data["income_data"]
     balance_sheet_data = data["balance_sheet_data"]
     cashflow_data = data["cashflow_data"]
     ratio_data = data["ratio_data"]
+    date_created = None
+    if ratio_data:
+        date_created = date.fromisoformat(ratio_data.get("date"))
 
     with get_db() as db:
         # add the company to the companies table
-        db.execute('''INSERT OR IGNORE INTO companies (symbol)
-            VALUES (?)''',
-            (symbol,))
+        db.execute('''INSERT OR IGNORE INTO companies (symbol, date_created)
+            VALUES (?, ?)''',
+            (symbol, date_created))
 
         # get the company id to use in storing the other attributes
         company_id = db.execute("SELECT id FROM companies WHERE symbol = ?", (symbol,)).fetchone()
         company_id = company_id["id"]
-        user_id = session["user_id"]
-
-        # add search to the portfolio table
-        if profile_data:
-            # if ratio data missing, coerce it into an empty dict
-            if ratio_data is None:
-                ratio_data = {}
-
-            db.execute('''INSERT OR REPLACE INTO portfolios 
-                (user_id, company_id, company_name, company_symbol, price_earnings, price_book,
-                operating_profit_margin, dividend_yield, current_ratio, debt_equity)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
-                (user_id, company_id, profile_data["companyName"], profile_data["symbol"], ratio_data.get("priceToEarningsRatio"),
-                 ratio_data.get("priceToBookRatio"), ratio_data.get("operatingProfitMargin"), ratio_data.get("dividendYieldPercentage"),
-                 ratio_data.get("currentRatio"), ratio_data.get("debtToEquityRatio")))
 
         # add the income statements to the income statements table
         if income_data:
@@ -180,7 +169,39 @@ def store_data(data, symbol):
     db.close()
 
 
-def user_portfolio(sort_by=None, order="ASC"):
+def update_user_portfolio(data, symbol):
+    # extract the data
+    profile_data = data["profile_data"]
+    ratio_data = data["ratio_data"]
+
+    with get_db() as db:
+        # get the company id to use in storing the portfolio attributes
+        company_id = db.execute("SELECT id FROM companies WHERE symbol = ?", (symbol,)).fetchone()
+        company_id = company_id["id"]
+        user_id = session["user_id"]
+
+        # add search to the portfolio table
+        if profile_data:
+            # if ratio data missing, coerce it into an empty dict
+            if ratio_data is None:
+                ratio_data = {}
+
+            db.execute('''INSERT OR REPLACE INTO portfolios 
+                (user_id, company_id, company_name, company_symbol, price_earnings, price_book,
+                operating_profit_margin, dividend_yield, current_ratio, debt_equity)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                (user_id, company_id, profile_data["companyName"], profile_data["symbol"], ratio_data.get("priceToEarningsRatio"),
+                    ratio_data.get("priceToBookRatio"), ratio_data.get("operatingProfitMargin"), ratio_data.get("dividendYieldPercentage"),
+                    ratio_data.get("currentRatio"), ratio_data.get("debtToEquityRatio")))
+
+        # commit changes
+        db.commit()
+
+    # close the connection
+    db.close()
+
+
+def retrieve_user_portfolio(sort_by=None, order="ASC"):
     """gets all the user search data to populate the portfolio page"""
 
     # ensure user is logged in
@@ -220,3 +241,24 @@ def user_portfolio(sort_by=None, order="ASC"):
     db.close()
 
     return results
+
+
+def needs_refresh(symbol):
+    """determines whether to pull new data depending on age of existing data"""
+
+    # extract the date
+    with get_db() as db:
+        date_created = db.execute("SELECT date_created FROM companies WHERE symbol = ?", (symbol,)).fetchone()
+        if date_created:
+            date_created = date_created["date_created"]
+
+    # close the connection
+    db.close()
+
+    # compute the age of the data and return it
+    if date_created:
+        date_created = date.fromisoformat(date_created)
+        age = date.today() - date_created
+        return age.days > 366
+
+    return True
