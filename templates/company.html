@@ -54,7 +54,7 @@
 
     <h3>Summary</h3>
 
-    <div class="company">
+    <div class="profile_info">
         {% if profile_data %}
             <table>
                 <tbody>
@@ -70,7 +70,7 @@
 
                     <tr>
                         <td class="label"><strong>Market Capitalization</strong></td>
-                        <td class="value">$ {{ profile_data.marketCap | currency }}</td>
+                        <td class="value">$ {{ profile_data.marketCap | currency_large }}</td>
                     </tr>
 
                     <tr>
@@ -142,10 +142,10 @@
         <table>
             <thead>
                 <tr>
-                    <td class="key"><strong>Breakdwon</strong></td>
+                    <td class="key"><strong>Breakdown</strong></td>
 
                     {% for year in income_data %}
-                        <td class="key">
+                        <td class="year">
                             <strong>{{ year.fiscalYear }}</strong>
                         </td>
                     {% endfor %}
@@ -158,7 +158,7 @@
 
                     {% for year in income_data %}
                         <td>
-                            {{ year.revenue | currency }}
+                            {{ year.revenue | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -168,7 +168,7 @@
 
                     {% for year in income_data %}
                         <td>
-                            {{ year.costOfRevenue | currency }}
+                            {{ year.costOfRevenue | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -178,7 +178,7 @@
 
                     {% for year in income_data %}
                         <td>
-                            <strong>{{ year.grossProfit | currency }}</strong>
+                            <strong>{{ year.grossProfit | currency_large }}</strong>
                         </td>
                     {% endfor %}
                 </tr>
@@ -188,7 +188,7 @@
 
                     {% for year in income_data %}
                         <td>
-                            {{ year.sellingGeneralAndAdministrativeExpenses | currency }}
+                            {{ year.sellingGeneralAndAdministrativeExpenses | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -198,7 +198,7 @@
 
                     {% for year in income_data %}
                         <td>
-                            {{ year.researchAndDevelopmentExpenses | currency }}
+                            {{ year.researchAndDevelopmentExpenses | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -208,7 +208,7 @@
 
                     {% for year in income_data %}
                         <td>
-                            <strong>{{ year.operatingIncome | currency }}</strong>
+                            <strong>{{ year.operatingIncome | currency_large }}</strong>
                         </td>
                     {% endfor %}
                 </tr>
@@ -218,7 +218,7 @@
 
                     {% for year in income_data %}
                         <td>
-                            {{ year.netInterestIncome | currency }}
+                            {{ year.netInterestIncome | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -228,7 +228,7 @@
 
                     {% for year in income_data %}
                         <td>
-                            {{ year.totalOtherIncomeExpensesNet | currency }}
+                            {{ year.totalOtherIncomeExpensesNet | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -238,7 +238,7 @@
 
                     {% for year in income_data %}
                         <td>
-                            {{ year.incomeBeforeTax | currency }}
+                            {{ year.incomeBeforeTax | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -248,7 +248,7 @@
 
                     {% for year in income_data %}
                         <td>
-                            {{ year.incomeTaxExpense | currency }}
+                            {{ year.incomeTaxExpense | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -258,7 +258,7 @@
 
                     {% for year in income_data %}
                         <td>
-                            {{ year.netIncome | currency }}
+                            <strong>{{ year.netIncome | currency_large }}</strong>
                         </td>
                     {% endfor %}
                 </tr>
@@ -276,7 +276,7 @@
                     <td class="key"><strong>Breakdown</strong></td>
 
                     {% for year in balance_sheet_data %}
-                        <td class="key">
+                        <td class="year">
                             <strong>{{ year.fiscalYear }}</strong>
                         </td>
                     {% endfor %}
@@ -289,7 +289,7 @@
 
                     {% for year in balance_sheet_data %}
                         <td>
-                            {{ year.cashAndShortTermInvestments | currency }}
+                            {{ year.cashAndShortTermInvestments | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -299,7 +299,7 @@
 
                     {% for year in balance_sheet_data %}
                         <td>
-                            {{ year.netReceivables | currency }}
+                            {{ year.netReceivables | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -309,7 +309,7 @@
 
                     {% for year in balance_sheet_data %}
                         <td>
-                            {{ year.inventory | currency }}
+                            {{ year.inventory | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -319,7 +319,7 @@
 
                     {% for year in balance_sheet_data %}
                         <td>
-                            {{ ((year.prepaids or 0) + (year.otherCurrentAssets or 0)) | currency }}
+                            {{ ((year.prepaids or 0) + (year.otherCurrentAssets or 0)) | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -329,7 +329,7 @@
 
                     {% for year in balance_sheet_data %}
                         <td>
-                            {{ year.propertyPlantEquipmentNet | currency }}
+                            {{ year.propertyPlantEquipmentNet | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -339,7 +339,7 @@
 
                     {% for year in balance_sheet_data %}
                         <td>
-                            {{ year.goodwillAndIntangibleAssets | currency }}
+                            {{ year.goodwillAndIntangibleAssets | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -349,7 +349,7 @@
 
                     {% for year in balance_sheet_data %}
                         <td>
-                            {{ year.longTermInvestments | currency }}
+                            {{ year.longTermInvestments | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -359,7 +359,7 @@
 
                     {% for year in balance_sheet_data %}
                         <td>
-                            {{ ((year.taxAssets or 0) + (year.otherNonCurrentAssets or 0) +(year.otherAssets)) | currency }}
+                            {{ ((year.taxAssets or 0) + (year.otherNonCurrentAssets or 0) +(year.otherAssets)) | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -369,7 +369,7 @@
 
                     {% for year in balance_sheet_data %}
                         <td>
-                            <strong>{{ year.totalAssets | currency }}</strong>
+                            <strong>{{ year.totalAssets | currency_large }}</strong>
                         </td>
                     {% endfor %}
                 </tr>
@@ -379,7 +379,7 @@
 
                     {% for year in balance_sheet_data %}
                         <td>
-                            {{ ((year.totalPayables or 0) + (year.accruedExpenses or 0) + (year.otherPayables)) | currency }}
+                            {{ ((year.totalPayables or 0) + (year.accruedExpenses or 0) + (year.otherPayables)) | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -389,7 +389,7 @@
 
                     {% for year in balance_sheet_data %}
                         <td>
-                            {{ year.shortTermDebt | currency }}
+                            {{ year.shortTermDebt | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -399,7 +399,7 @@
 
                     {% for year in balance_sheet_data %}
                         <td>
-                            {{ year.deferredRevenue | currency }}
+                            {{ year.deferredRevenue | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -409,7 +409,7 @@
 
                     {% for year in balance_sheet_data %}
                         <td>
-                            {{ ((year.taxPayables or 0) + (year.otherCurrentLiabilities or 0) + (year.capitalLeaseObligationsCurrent or 0)) | currency }}
+                            {{ ((year.taxPayables or 0) + (year.otherCurrentLiabilities or 0) + (year.capitalLeaseObligationsCurrent or 0)) | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -419,7 +419,7 @@
 
                     {% for year in balance_sheet_data %}
                         <td>
-                            {{ year.longTermDebt | currency }}
+                            {{ year.longTermDebt | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -429,7 +429,7 @@
 
                     {% for year in balance_sheet_data %}
                         <td>
-                            {{ year.capitalLeaseObligationsNonCurrent | currency }}
+                            {{ year.capitalLeaseObligationsNonCurrent | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -441,7 +441,7 @@
                         <td>
                             {{ ((year.capitalLeaseObligationsNonCurrent or 0) + (year.otherNonCurrentLiabilities or 0) +
                                 (year.deferredRevenueNonCurrent or 0) + (year.deferredTaxLiabilitiesNonCurrent or 0) +
-                                (year.otherLiabilities or 0) + (year.capitalLeaseObligations or 0))| currency }}
+                                (year.otherLiabilities or 0) + (year.capitalLeaseObligations or 0))| currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -452,7 +452,7 @@
                     {% for year in balance_sheet_data %}
                         <td>
                             {{ ((year.treasuryStock or 0) + (year.preferredStock or 0) + (year.commonStock or 0) +
-                                (year.additionalPaidInCapital or 0) + (year.otherTotalStockholdersEquity or 0)) | currency }}
+                                (year.additionalPaidInCapital or 0) + (year.otherTotalStockholdersEquity or 0)) | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -462,7 +462,7 @@
 
                     {% for year in balance_sheet_data %}
                         <td>
-                            {{ year.retainedEarnings | currency }}
+                            {{ year.retainedEarnings | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -472,7 +472,7 @@
 
                     {% for year in balance_sheet_data %}
                         <td>
-                            {{ year.accumulatedOtherComprehensiveIncomeLoss | currency }}
+                            {{ year.accumulatedOtherComprehensiveIncomeLoss | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -482,7 +482,7 @@
 
                     {% for year in balance_sheet_data %}
                         <td>
-                            {{ year.minorityInterest | currency }}
+                            {{ year.minorityInterest | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -492,7 +492,7 @@
 
                     {% for year in balance_sheet_data %}
                         <td>
-                            <strong>{{ year.totalLiabilitiesAndTotalEquity | currency }}</strong>
+                            <strong>{{ year.totalLiabilitiesAndTotalEquity | currency_large }}</strong>
                         </td>
                     {% endfor %}
                 </tr>
@@ -506,10 +506,10 @@
         <table>
             <thead>
                 <tr>
-                    <td class="key"><strong>BREAKDOWN</strong></td>
+                    <td class="key"><strong>Breakdown</strong></td>
 
                     {% for year in cashflow_data %}
-                        <td class="key">
+                        <td class="year">
                             <strong>{{ year.fiscalYear }}</strong>
                         </td>
                     {% endfor %}
@@ -522,7 +522,7 @@
 
                     {% for year in cashflow_data %}
                         <td>
-                            {{ year.revenue | currency }}
+                            {{ year.revenue | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -532,7 +532,7 @@
 
                     {% for year in cashflow_data %}
                         <td>
-                            {{ year.revenue | currency }}
+                            {{ year.revenue | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -542,7 +542,7 @@
 
                     {% for year in cashflow_data %}
                         <td>
-                            {{ year.revenue | currency }}
+                            {{ year.revenue | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -552,7 +552,7 @@
 
                     {% for year in cashflow_data %}
                         <td>
-                            {{ year.revenue | currency }}
+                            {{ year.revenue | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -562,7 +562,7 @@
 
                     {% for year in cashflow_data %}
                         <td>
-                            {{ year.revenue | currency }}
+                            {{ year.revenue | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -572,7 +572,7 @@
 
                     {% for year in cashflow_data %}
                         <td>
-                            {{ year.revenue | currency }}
+                            {{ year.revenue | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -582,7 +582,7 @@
 
                     {% for year in cashflow_data %}
                         <td>
-                            {{ year.revenue | currency }}
+                            {{ year.revenue | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -592,7 +592,7 @@
 
                     {% for year in cashflow_data %}
                         <td>
-                            {{ year.revenue | currency }}
+                            {{ year.revenue | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -601,7 +601,7 @@
         </table>
     </div>
     
-    <div class="company">
+    <div class="company_nav">
         <form action="/" method="get">
             <input name="index" id="index" hidden>
             <input type="submit" name="submit" id="submit" value="New Search">
