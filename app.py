@@ -19,6 +19,13 @@ def currency(value):
         return ""
     return "{:,.2f}".format(value)
 
+# jinja will use this to format large numbers down into billions
+@app.template_filter("currency_large")
+def currency_large(value):
+    if value is None or isinstance(value, Undefined):
+        return ""
+    return "{:,.3f}B".format(value/1000000000)
+
 
 @app.route("/register", methods=["GET", "POST"])
 def register():

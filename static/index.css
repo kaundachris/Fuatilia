@@ -27,16 +27,21 @@ main {
     padding: 10px;
 }
 
-.more_info, .label, .key {
+.more_info, .label, .key, .year {
     color:rgb(10, 136, 179);
 }
 
-.nav, .company {
+.nav {
     display: flex;
     justify-content: space-between;
 }
 
-.company {
+.profile_info {
+    display: flex;
+    justify-content: space-between;
+}
+
+.company_nav {
     display: flex;
     justify-content: space-evenly;
 }
@@ -121,7 +126,7 @@ tr:nth-child(odd) {
 }
 
 .key {
-    width: 15%;
+    width: 30%;
 }
 
 /*footer styling*/
