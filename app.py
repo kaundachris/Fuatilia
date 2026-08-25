@@ -76,8 +76,9 @@ def register():
     # store the user's search - if available - in their database
     symbol = session.get("last_symbol")
     if symbol:
-        data = StockData(symbol).package_data()
-        update_user_portfolio(data, symbol)
+        data = session.get("data")
+        if data:
+            update_user_portfolio(data, symbol)
 
     return redirect("/portfolio")
 
@@ -126,12 +127,17 @@ def login():
             session["login_counter"] += 1
             return render_template("login.html", message="Invalid username or password!")
 
-        # Set user_id in session after successful login
+        # Set user data in session after successful login
         last_symbol = session.get("last_symbol")
+        data = session.get("data")
         session.clear()
         session["user_id"] = user["id"]
+        
         if last_symbol:
             session["last_symbol"] = last_symbol
+
+        if data:
+            session["data"] = data
 
     # close the connection
     db.close()
@@ -139,8 +145,9 @@ def login():
     # store the user's search - if available - in their database
     symbol = session.get("last_symbol")
     if symbol:
-        data = StockData(symbol).package_data()
-        update_user_portfolio(data, symbol)
+        data = session.get("data")
+        if data:
+            update_user_portfolio(data, symbol)
     
     return redirect("/portfolio")
 
@@ -202,8 +209,9 @@ def reset():
     # store the user's search - if available - in their database
     symbol = session.get("last_symbol")
     if symbol:
-        data = StockData(symbol).package_data()
-        update_user_portfolio(data, symbol)
+        data = session.get("data")
+        if data:
+            update_user_portfolio(data, symbol)
 
     return redirect("/portfolio")
 
@@ -258,6 +266,8 @@ def company():
 
     # store the search data
     session["last_symbol"] = symbol
+    portfolio_data = {"profile_data": data["profile_data"], "ratio_data": data["ratio_data"]}
+    session["data"] = portfolio_data
 
     store_financial_statements(data, symbol)
 
@@ -286,6 +296,7 @@ def portfolio():
 
     # store this in the database
     update_user_portfolio(data, symbol)
+    store_financial_statements(data, symbol)
 
     # render the page with the new entry
     return render_template("portfolio.html", portfolio=retrieve_user_portfolio())
