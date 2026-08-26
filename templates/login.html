@@ -18,30 +18,32 @@
 </div>
 {% endblock %}
 
-{% block main %}
-<h1>Log In</h1>
-<i class="more_info">Logging in allows you to keep a record of your searches for future reference</i>
+<main>
+    {% block main %}
+        <h1>Log In</h1>
+        <i class="more_info">Logging in allows you to keep a record of your searches for future reference</i>
 
-<form class="page" action="/login" method="post">
-    <div class="forms">
-        <div>
-            <input type="email" name="username" id="username" autofocus autocomplete="off"
-                placeholder="Enter your email" {% if disabled %} disabled {% endif %}>
-        </div>
-        <div>
-            <input type="password" name="password" id="password" autofocus autocomplete="off"
-                placeholder="Must contain at least one number and one letter" {% if disabled %} disabled {% endif %}>
-        </div>
-    </div>
-    <div>
-        <input type="submit" name="submit" id="submit" value="Log In">
-    </div>
-</form>
+        <form class="page" action="/login" method="post">
+            <div class="forms">
+                <div>
+                    <input type="email" name="username" id="username" autofocus autocomplete="off"
+                        placeholder="Enter your email" {% if disabled %} disabled {% endif %}>
+                </div>
+                <div>
+                    <input type="password" name="password" id="password" autofocus autocomplete="off"
+                        placeholder="Must contain at least one number and one letter" {% if disabled %} disabled {% endif %}>
+                </div>
+            </div>
+            <div>
+                <input type="submit" name="submit" id="submit" value="Log In">
+            </div>
+        </form>
 
-<form action="/reset" method="get">
-    <input name="reset" id="reset" hidden>
-    <input type="submit" name="submit" id="submit" value="Reset Password">
-</form>
+        <form action="/reset" method="get">
+            <input name="reset" id="reset" hidden>
+            <input type="submit" name="submit" id="submit" value="Reset Password">
+        </form>
 
-<p> {{ message }}</p>
-{% endblock %}
+        <p> {{ message }}</p>
+    {% endblock %}
+</main>

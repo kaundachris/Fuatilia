@@ -18,128 +18,126 @@
 </div>
 {% endblock %}
 
-{% block main %}
-<br>
-<br>
-<h3>Your Previous Queries</h3>
-<i class="more_info">To check for new data, click on the update button</i>
-<br>
-<br>
-<i class="more_info">{{ message }}</i>
+<main>
+    {% block main %}
+    <br>
+    <br>
+    <h3>Your Previous Queries</h3>
+    <i class="more_info">To check for new data, click on the update button</i>
+    <br>
+    <br>
+    <i class="more_info">{{ message }}</i>
 
-<table>
-    <thead>
-        <tr>
-            <td><strong>Company</strong></td>
+    <table>
+        <thead>
+            <tr>
+                <td><strong>Company</strong></td>
 
-            <td>
-                <strong>Symbol</strong>
-            </td>
+                <td>
+                    <strong>Symbol</strong>
+                </td>
 
-            <td>
-                <strong>
-                    <form action="/sort" method="post">
-                        <input name="sort" id="sort" hidden value="price_earnings">
-                        <input type="submit" name="sort" id="sort" value="Price to Earnings">
-                    </form>
-                </strong>
-            </td>
+                <td>
+                    <strong>
+                        <form action="/sort" method="post">
+                            <input name="sort" id="sort" hidden value="price_earnings">
+                            <input type="submit" name="sort" id="sort" value="Price to Earnings">
+                        </form>
+                    </strong>
+                </td>
 
-            <td>
-                <strong>
-                    <form action="/sort" method="post">
-                        <input name="sort" id="sort" hidden value="price_book">
-                        <input type="submit" name="sort" id="sort" value="Price to Book">
-                    </form>
-                </strong>
-            </td>
+                <td>
+                    <strong>
+                        <form action="/sort" method="post">
+                            <input name="sort" id="sort" hidden value="price_book">
+                            <input type="submit" name="sort" id="sort" value="Price to Book">
+                        </form>
+                    </strong>
+                </td>
 
-            <td>
-                <strong>
-                    <form action="/sort" method="post">
-                        <input name="sort" id="sort" hidden value="operating_profit_margin">
-                        <input type="submit" name="sort" id="sort" value="Profit Margin">
-                    </form>
-                </strong>
-            </td>
+                <td>
+                    <strong>
+                        <form action="/sort" method="post">
+                            <input name="sort" id="sort" hidden value="operating_profit_margin">
+                            <input type="submit" name="sort" id="sort" value="Profit Margin">
+                        </form>
+                    </strong>
+                </td>
 
-            <td>
-                <strong>
-                    <form action="/sort" method="post">
-                        <input name="sort" id="sort" hidden value="dividend_yield">
-                        <input type="submit" name="sort" id="sort" value="Dividend Yield">
-                    </form>
-                </strong>
-            </td>
+                <td>
+                    <strong>
+                        <form action="/sort" method="post">
+                            <input name="sort" id="sort" hidden value="dividend_yield">
+                            <input type="submit" name="sort" id="sort" value="Dividend Yield">
+                        </form>
+                    </strong>
+                </td>
 
-            <td>
-                <strong>
-                    <form action="/sort" method="post">
-                        <input name="sort" id="sort" hidden value="current_ratio">
-                        <input type="submit" name="sort" id="sort" value="Current Ratio">
-                    </form>
-                </strong>
-            </td>
+                <td>
+                    <strong>
+                        <form action="/sort" method="post">
+                            <input name="sort" id="sort" hidden value="current_ratio">
+                            <input type="submit" name="sort" id="sort" value="Current Ratio">
+                        </form>
+                    </strong>
+                </td>
 
-            <td>
-                <strong>
-                    <form action="/sort" method="post">
-                        <input name="sort" id="sort" hidden value="debt_equity">
-                        <input type="submit" name="sort" id="sort" value="Debt to Equity">
-                    </form>
-                </strong>
-            </td>
+                <td>
+                    <strong>
+                        <form action="/sort" method="post">
+                            <input name="sort" id="sort" hidden value="debt_equity">
+                            <input type="submit" name="sort" id="sort" value="Debt to Equity">
+                        </form>
+                    </strong>
+                </td>
 
-            <td><strong>Delete</strong></td>
-        </tr>
-    </thead>
+                <td><strong>Delete</strong></td>
+            </tr>
+        </thead>
 
-    <tbody>
-        {% for company in portfolio %}
-        <tr>
-            <td>
-                <div>
+        <tbody>
+            {% for company in portfolio %}
+            <tr>
+                <td>
                     <form action="/company" method="post">
                         <input name="company" id="company" hidden value="{{ company.company_symbol }}">
                         <button type="submit" name="submit" id="submit">{{ company.company_name }}</button>
                     </form>
-                </div>
-            </td>
+                </td>
 
-            <td>
-                <div>
+                <td>
                     <form action="/company" method="post">
                         <input name="company" id="company" hidden value="{{ company.company_symbol }}">
                         <button type="submit" name="submit" id="submit">{{ company.company_symbol }}</button>
                     </form>
-                </div>
-            </td>
+                </td>
 
-            <td>{{ company.price_earnings | currency }}</td>
+                <td>{{ company.price_earnings | currency }}</td>
 
-            <td>{{ company.price_book | currency }}</td>
+                <td>{{ company.price_book | currency }}</td>
 
-            <td>{{ company.operating_profit_margin | currency }}</td>
+                <td>{{ company.operating_profit_margin | currency }}</td>
 
-            <td>{{ company.dividend_yield | currency }}</td>
+                <td>{{ company.dividend_yield | currency }}</td>
 
-            <td>{{ company.current_ratio | currency }}</td>
+                <td>{{ company.current_ratio | currency }}</td>
 
-            <td>{{ company.debt_equity | currency }}</td>
+                <td>{{ company.debt_equity | currency }}</td>
 
-            <td style="padding: 5px;">
-                <div style="display:flex; align-items:center; gap:8px; margin: 5px; padding: 5px;">
-                    <form action="/delete" method="post">
-                        <input name="delete" id="delete" hidden value="{{ company.company_symbol }}">
-                        <button type="submit" name="submit" id="submit">
-                            <i class="material-icons">delete</i>
-                        </button>
-                    </form>
-                </div>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-</div>
-{% endblock %}
+                <td style="padding: 5px;">
+                    <div style="display:flex; align-items:center; gap:8px; margin: 5px; padding: 5px;">
+                        <form action="/delete" method="post">
+                            <input name="delete" id="delete" hidden value="{{ company.company_symbol }}">
+                            <button type="submit" name="submit" id="submit">
+                                <i class="material-icons">delete</i>
+                            </button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    {% endblock %}
+</main>
