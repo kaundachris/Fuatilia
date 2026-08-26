@@ -18,26 +18,28 @@
 </div>
 {% endblock %}
 
-{% block main %}
-<h1>Reset Password Below</h1>
-<i class="more_info">Do not use a password you use anywhere else!</i>
+<main>
+    {% block main %}
+        <h1>Reset Password Below</h1>
+        <i class="more_info">Do not use a password you use anywhere else!</i>
 
-<form class="page" action="/reset" method="post">
-    <div>
-        <input type="email" name="username" id="username" autofocus autocomplete="off" placeholder="Enter your email">
-    </div>
-    <div>
-        <input type="password" name="password" id="password" autofocus autocomplete="off"
-            placeholder="Must contain at least one number and one letter">
-    </div>
-    <div>
-        <input type="password" name="confirm_password" id="confirm_password" autofocus autocomplete="off"
-            placeholder="Must match with the password entered above">
-    </div>
-    <div>
-        <input type="submit" name="submit" id="submit" value="Reset Password">
-    </div>
-</form>
+        <form class="page" action="/reset" method="post">
+            <div>
+                <input type="email" name="username" id="username" autofocus autocomplete="off" placeholder="Enter your email">
+            </div>
+            <div>
+                <input type="password" name="password" id="password" autofocus autocomplete="off"
+                    placeholder="Must contain at least one number and one letter">
+            </div>
+            <div>
+                <input type="password" name="confirm_password" id="confirm_password" autofocus autocomplete="off"
+                    placeholder="Must match with the password entered above">
+            </div>
+            <div>
+                <input type="submit" name="submit" id="submit" value="Reset Password">
+            </div>
+        </form>
 
-<p> {{ message }}</p>
-{% endblock %}
+        <p> {{ message }}</p>
+    {% endblock %}
+</main>

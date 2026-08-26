@@ -31,19 +31,21 @@
 </div>
 {% endblock %}
 
-{% block main %}
-    <h3>Enter A Company's Name or Ticker Below</h3>
-    <i class="more_info">Company should be traded in the US stock market</i>
+<main>
+    {% block main %}
+        <h3>Enter A Company's Name or Ticker Below</h3>
+        <i class="more_info">Company should be traded in the US stock market</i>
 
-    <form class="search" action="/" method="post">
-        <div>
-            <input type="text" name="user_input" id="user_input" autofocus autocomplete="off"
-                placeholder="Example: Tesla if you want info on Tesla">
-        </div>
-        <div>
-            <input type="submit" name="submit" id="submit" value="Get Data">
-        </div>
-    </form>
+        <form class="search" action="/" method="post">
+            <div>
+                <input type="text" name="user_input" id="user_input" autofocus autocomplete="off"
+                    placeholder="Example: Tesla if you want info on Tesla">
+            </div>
+            <div>
+                <input type="submit" name="submit" id="submit" value="Get Data">
+            </div>
+        </form>
 
-    <p> {{ message }}</p>
-{% endblock %}
+        <p> {{ message }}</p>
+    {% endblock %}
+</main>

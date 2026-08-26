@@ -70,7 +70,7 @@ input[name="submit"] {
     transition: background-color 0.2s ease;
 }
 
-input[name="sort"], input[name="search_result"] {
+input[name="sort"] {
     border: none;
     color:antiquewhite;
     background-color:rgb(30, 30, 30);
@@ -105,10 +105,10 @@ table {
     table-layout: fixed;
 }
 
-th, td {
-    border: 1px;
+td {
     border-style: none;
     border-radius: 5px;
+    padding: 5px;
 }
 
 tr:nth-child(even) {

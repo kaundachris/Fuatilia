@@ -31,50 +31,48 @@
 </div>
 {% endblock %}
 
-{% block main %}
-    <h1>Search Results</h1>
+<main>
+    {% block main %}
+        <h1>Search Results</h1>
 
-    <i class="more_info">Click on the name or symbol of your desired search</i>
+        <i class="more_info">Click on the name or symbol of your desired search</i>
 
-    <table>
-        <thead>
-            <tr>
-                <td><strong>Name</strong></td>
-                <td><strong>Symbol</strong></td>
-                <td><strong>Currency</strong></td>
-                <td><strong>Exchange</strong></td>
-            </tr>
-        </thead>
-
-        <tbody>
-            {% for result in search_results %}
+        <table>
+            <thead>
                 <tr>
-                    <td>
-                        <div>
+                    <td><strong>Name</strong></td>
+                    <td><strong>Symbol</strong></td>
+                    <td><strong>Currency</strong></td>
+                    <td><strong>Exchange</strong></td>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for result in search_results %}
+                    <tr>
+                        <td>
                             <form action="/company" method="post">
                                 <input name="company" id="company" hidden value="{{ result.symbol }}">
                                 <button type="submit" name="submit" id="submit">{{ result.name }}</button>
                             </form>
-                        </div>
-                    </td>
-                    <td>
-                        <div>
+                        </td>
+                        <td>
                             <form action="/company" method="post">
                                 <input name="company" id="company" hidden value="{{ result.symbol }}">
                                 <button type="submit" name="submit" id="submit">{{ result.symbol }}</button>
                             </form>
-                        </div>
-                    </td>
-                    <td>{{ result.currency }}</td>
-                    <td>{{ result.exchange }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                        </td>
+                        <td>{{ result.currency }}</td>
+                        <td>{{ result.exchange }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
 
-    <form action="/" method="get">
-        <input name="index" id="index" hidden>
-        <input type="submit" name="submit" id="submit" value="New Search">
-    </form>
+        <form action="/" method="get">
+            <input name="index" id="index" hidden>
+            <input type="submit" name="submit" id="submit" value="New Search">
+        </form>
 
-{% endblock %}
+    {% endblock %}
+</main>
