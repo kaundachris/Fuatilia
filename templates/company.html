@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block header %}
-<div class="top">
+<div class="header">
     <h1>Fuatilia</h1>
 
     <div class="nav">
@@ -52,93 +52,95 @@
         {% endif %}
     </div>
 
-    <h3>Summary</h3>
+    <div class="section">
+        <h3>Summary</h3>
 
-    <div class="profile_info">
-        {% if profile_data %}
-            <table>
-                <tbody>
-                    <tr>
-                        <td class="label"><strong>Symbol</strong></td>
-                        <td class="value">{{ profile_data.symbol }}</td>
-                    </tr>
+        <div class="profile_info">
+            {% if profile_data %}
+                <table>
+                    <tbody>
+                        <tr>
+                            <td class="label"><strong>Symbol</strong></td>
+                            <td class="value">{{ profile_data.symbol }}</td>
+                        </tr>
 
-                    <tr>
-                        <td class="label"><strong>Currency</strong></td>
-                        <td class="value">{{ profile_data.currency }}</td>
-                    </tr>
+                        <tr>
+                            <td class="label"><strong>Currency</strong></td>
+                            <td class="value">{{ profile_data.currency }}</td>
+                        </tr>
 
-                    <tr>
-                        <td class="label"><strong>Market Capitalization</strong></td>
-                        <td class="value">$ {{ profile_data.marketCap | currency_large }}</td>
-                    </tr>
+                        <tr>
+                            <td class="label"><strong>Market Capitalization</strong></td>
+                            <td class="value">$ {{ profile_data.marketCap | currency_large }}</td>
+                        </tr>
 
-                    <tr>
-                        <td class="label"><strong>Exchange</strong></td>
-                        <td class="value">{{ profile_data.exchange }}</td>
-                    </tr>
+                        <tr>
+                            <td class="label"><strong>Exchange</strong></td>
+                            <td class="value">{{ profile_data.exchange }}</td>
+                        </tr>
 
-                    <tr>
-                        <td class="label"><strong>Industry</strong></td>
-                        <td class="value">{{ profile_data.industry }}</td>
-                    </tr>
+                        <tr>
+                            <td class="label"><strong>Industry</strong></td>
+                            <td class="value">{{ profile_data.industry }}</td>
+                        </tr>
 
-                    <tr>
-                        <td class="label"><strong>Country</strong></td>
-                        <td class="value">{{ profile_data.country }}</td>
-                    </tr>
-                </tbody>
-            </table>
+                        <tr>
+                            <td class="label"><strong>Country</strong></td>
+                            <td class="value">{{ profile_data.country }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            
+            {% else %}
+                <p>Profile data unavailable for this company.</p>
+                
+            {% endif %}
         
-        {% else %}
-            <p>Profile data unavailable for this company.</p>
-            
-        {% endif %}
-    
-        {% if ratio_data %}
-            <table>
-                <tbody>
-                    <tr>
-                        <td class="label"><strong>Price to Earnings</strong></td>
-                        <td class="value">{{ ratio_data.priceToEarningsRatio | currency }}</td>
-                    </tr>
+            {% if ratio_data %}
+                <table>
+                    <tbody>
+                        <tr>
+                            <td class="label"><strong>Price to Earnings</strong></td>
+                            <td class="value">{{ ratio_data.priceToEarningsRatio | currency }}</td>
+                        </tr>
 
-                    <tr>
-                        <td class="label"><strong>Price to Book</strong></td>
-                        <td class="value">{{ ratio_data.priceToBookRatio | currency }}</td>
-                    </tr>
+                        <tr>
+                            <td class="label"><strong>Price to Book</strong></td>
+                            <td class="value">{{ ratio_data.priceToBookRatio | currency }}</td>
+                        </tr>
 
-                    <tr>
-                        <td class="label"><strong>Operating Profit Margin</strong></td>
-                        <td class="value">{{ ratio_data.operatingProfitMargin | currency }}</td>
-                    </tr>
+                        <tr>
+                            <td class="label"><strong>Operating Profit Margin</strong></td>
+                            <td class="value">{{ ratio_data.operatingProfitMargin | currency }}</td>
+                        </tr>
 
-                    <tr>
-                        <td class="label"><strong>Dividend Yield (%)</strong></td>
-                        <td class="value">{{ ratio_data.dividendYieldPercentage | currency }}</td>
-                    </tr>
+                        <tr>
+                            <td class="label"><strong>Dividend Yield (%)</strong></td>
+                            <td class="value">{{ ratio_data.dividendYieldPercentage | currency }}</td>
+                        </tr>
 
-                    <tr>
-                        <td class="label"><strong>Current Ratio</strong></td>
-                        <td class="value">{{ ratio_data.currentRatio | currency }}</td>
-                    </tr>
+                        <tr>
+                            <td class="label"><strong>Current Ratio</strong></td>
+                            <td class="value">{{ ratio_data.currentRatio | currency }}</td>
+                        </tr>
 
-                    <tr>
-                        <td class="label"><strong>Debt to Equity</strong></td>
-                        <td class="value">{{ ratio_data.debtToEquityRatio | currency }}</td>
-                    </tr>
-                </tbody>
-            </table>
+                        <tr>
+                            <td class="label"><strong>Debt to Equity</strong></td>
+                            <td class="value">{{ ratio_data.debtToEquityRatio | currency }}</td>
+                        </tr>
+                    </tbody>
+                </table>
 
-        {% else %}
-            <p>Ratio data unavailable for this company.</p>
-            
-        {% endif %}
+            {% else %}
+                <p>Ratio data unavailable for this company.</p>
+                
+            {% endif %}
+        </div>
     </div>
 
-    <h3>Income Statement</h3>
+    <div class="section">
+        <h3>Income Statement</h3>
 
-    <div>
         <table>
             <thead>
                 <tr>
@@ -184,7 +186,7 @@
                 </tr>
 
                 <tr>
-                    <td class="key">Selling, General and Admin</td>
+                    <td class="key">Selling, General and Admin Expenses</td>
 
                     {% for year in income_data %}
                         <td>
@@ -204,6 +206,16 @@
                 </tr>
 
                 <tr>
+                    <td class="key">Other Expenses</td>
+
+                    {% for year in income_data %}
+                        <td>
+                            {{ year.otherExpenses | currency_large }}
+                        </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
                     <td class="key"><strong>Operating Income</strong></td>
 
                     {% for year in income_data %}
@@ -214,17 +226,7 @@
                 </tr>
 
                 <tr>
-                    <td class="key">Net Interest Income</td>
-
-                    {% for year in income_data %}
-                        <td>
-                            {{ year.netInterestIncome | currency_large }}
-                        </td>
-                    {% endfor %}
-                </tr>
-
-                <tr>
-                    <td class="key">Net Other Income Expenses</td>
+                    <td class="key">Net of Other Income Expenses</td>
 
                     {% for year in income_data %}
                         <td>
@@ -267,9 +269,9 @@
         </table>
     </div>
 
-    <h3>Balance Sheet</h3>
+    <div class="section">
+        <h3>Balance Sheet</h3>
 
-    <div>
         <table>
             <thead>
                 <tr>
@@ -379,7 +381,7 @@
 
                     {% for year in balance_sheet_data %}
                         <td>
-                            {{ ((year.totalPayables or 0) + (year.accruedExpenses or 0) + (year.otherPayables)) | currency_large }}
+                            {{ ((year.totalPayables or 0) + (year.accruedExpenses or 0)) | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -409,7 +411,8 @@
 
                     {% for year in balance_sheet_data %}
                         <td>
-                            {{ ((year.taxPayables or 0) + (year.otherCurrentLiabilities or 0) + (year.capitalLeaseObligationsCurrent or 0)) | currency_large }}
+                            {{ ((year.taxPayables or 0) + (year.otherCurrentLiabilities or 0) +
+                                (year.capitalLeaseObligationsCurrent or 0)) | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -439,9 +442,8 @@
 
                     {% for year in balance_sheet_data %}
                         <td>
-                            {{ ((year.capitalLeaseObligationsNonCurrent or 0) + (year.otherNonCurrentLiabilities or 0) +
-                                (year.deferredRevenueNonCurrent or 0) + (year.deferredTaxLiabilitiesNonCurrent or 0) +
-                                (year.otherLiabilities or 0) + (year.capitalLeaseObligations or 0))| currency_large }}
+                            {{ ((year.otherNonCurrentLiabilities or 0) + (year.deferredRevenueNonCurrent or 0) +
+                                (year.deferredTaxLiabilitiesNonCurrent or 0) + (year.otherLiabilities or 0))| currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
@@ -500,9 +502,9 @@
         </table>
     </div>
 
-    <h3>Cashflow Statement</h3>
+    <div class="section">
+        <h3>Cashflow Statement</h3>
 
-    <div>
         <table>
             <thead>
                 <tr>
@@ -518,85 +520,94 @@
 
             <tbody>
                 <tr>
-                    <td class="key"></td>
+                    <td class="key">Cash At Beginning Of Period</td>
 
                     {% for year in cashflow_data %}
                         <td>
-                            {{ year.revenue | currency_large }}
+                            {{ year.cashAtBeginningOfPeriod | currency_large }}
+                        </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td class="key">Net Cash, Operating Activities</td>
+
+                    {% for year in cashflow_data %}
+                        <td>
+                            {{ year.netCashProvidedByOperatingActivities | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
                 
                 <tr>
-                    <td class="key"></td>
+                    <td class="key">Net Cash, Investing Activities</td>
 
                     {% for year in cashflow_data %}
                         <td>
-                            {{ year.revenue | currency_large }}
+                            {{ year.netCashProvidedByInvestingActivities | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
 
                 <tr>
-                    <td class="key"></td>
+                    <td class="key">Net Cash, Financing Activities</td>
 
                     {% for year in cashflow_data %}
                         <td>
-                            {{ year.revenue | currency_large }}
+                            {{ year.netCashProvidedByFinancingActivities | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
 
                 <tr>
-                    <td class="key"></td>
+                    <td class="key">Effect Of Forex Changes On Cash</td>
 
                     {% for year in cashflow_data %}
                         <td>
-                            {{ year.revenue | currency_large }}
+                            {{ year.effectOfForexChangesOnCash | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
 
                 <tr>
-                    <td class="key"></td>
+                    <td class="key"><strong>Cash At End Of Period</strong></td>
 
                     {% for year in cashflow_data %}
                         <td>
-                            {{ year.revenue | currency_large }}
+                            <strong>{{ year.cashAtEndOfPeriod | currency_large }}</strong>
                         </td>
                     {% endfor %}
                 </tr>
 
                 <tr>
-                    <td class="key"></td>
+                    <td class="key">Operating Cash Flow</td>
 
                     {% for year in cashflow_data %}
                         <td>
-                            {{ year.revenue | currency_large }}
+                            {{ year.operatingCashFlow | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
 
                 <tr>
-                    <td class="key"></td>
+                    <td class="key">Capital Expenditure</td>
 
                     {% for year in cashflow_data %}
                         <td>
-                            {{ year.revenue | currency_large }}
+                            {{ year.capitalExpenditure | currency_large }}
                         </td>
                     {% endfor %}
                 </tr>
 
                 <tr>
-                    <td class="key"></td>
+                    <td class="key"><strong>Free CashFlow</strong></td>
 
                     {% for year in cashflow_data %}
                         <td>
-                            {{ year.revenue | currency_large }}
+                            <strong>{{ year.freeCashFlow | currency_large }}</strong>
                         </td>
                     {% endfor %}
                 </tr>
-
             </tbody>
         </table>
     </div>
