@@ -1,148 +1,87 @@
-# Stock Analyzer
+# Fuatilia
 
-Stock Analyzer is a Flask-based web application for reviewing fundamental stock data and saving research over time. It is intended as a portfolio project that combines backend development, external API usage, authentication, persistence, and deployment practices in one product.
+Fuatilia ("to track/follow" in Swahili) is a web app for looking up US-listed companies and reviewing their key financial statements — income statement, balance sheet, and cashflow statement — pulled live from [Financial Modeling Prep](https://financialmodelingprep.com/) (FMP). Registered users can save companies to a personal portfolio and sort them by financial ratios.
 
-**Live Site:** https://www.onceingolconda.com/
+Built by [Chris Kaunda](https://www.linkedin.com/in/chriskaunda/) as a project to learn programming from the ground up, with a focus on connecting a finance background to real code.
 
-## What this project does
+---
 
-Users can search for a company by name or ticker symbol and view core financial metrics such as:
+## What it does
 
-- Forward P/E
-- Earnings growth
-- Profit margin
-- Market capitalization
-- Book value
-- Price-to-book ratio
-- Quick ratio
-- Current ratio
-- Free cash flow
+- **Search** for any US-listed company by name or ticker (NASDAQ, NYSE, AMEX)
+- **View** a company's profile, price chart, and three core financial statements across multiple fiscal years
+- **Register / log in** to keep a personal portfolio of companies
+- **Sort** your portfolio by valuation and financial ratios (P/E, P/B, margin, dividend yield, current ratio, debt-to-equity)
+- **Cache** financial statement data locally so repeat visits don't hit the API unnecessarily
 
-The app also provides plain-language context around each metric so the analysis is easier to interpret for non-technical users.
+---
 
-## Core features
+## Screenshots
 
-- Company lookup by ticker or company name
-- Retrieval of live financial data through Yahoo Finance
-- Fundamental analysis views for valuation, profitability, liquidity, and cash flow metrics
-- User accounts with registration, login, password reset, and logout
-- Persistent search history for authenticated users
-- Update and delete actions for saved research entries
-- Sortable history data for comparing financial metrics over time
-- Guest access for basic exploration without creating an account
+**Search**
+![Search page](static/images/search-page.png)
 
-## Why this is a strong engineering showcase
+**Company page** — profile, price chart, and financial statements
+![Company page](static/images/company-page.jpeg)
 
-This project goes beyond a simple demo app. It brings together several common engineering concerns in one product:
+**Portfolio** — saved companies with sortable ratios
+![Portfolio page](static/images/portfolio-page.png)
 
-- Backend development with Flask and Python
-- External API integration and data handling
-- Authentication, session management, and secure password hashing
-- Database design and persistence with SQLite (default; file-based `fundamentals.db` created automatically)
-- Input validation and protection against common web vulnerabilities
-- Deployment configuration for a production-style hosting environment
+---
 
-## Technical stack
+## Tech stack
 
-- Backend: Python, Flask
-- Database: SQLite (default; file-based `fundamentals.db` created automatically). Optional: PostgreSQL if you configure `DATABASE_URL` and adapt the code.
-- Frontend: HTML, CSS, JavaScript, Jinja2
-- Data source: Yahoo Finance via yfinance
-- Authentication: bcrypt
-- Deployment: PythonAnywhere or local Flask
+| Layer | Tool |
+|---|---|
+| Backend | Python, Flask |
+| Templates | Jinja2 |
+| Database | SQLite |
+| Data source | Financial Modeling Prep API |
+| Charts | Plotly |
+| Auth | bcrypt (password hashing), Flask sessions |
 
+---
 
 ## Project structure
 
-- app.py: Flask routes, session handling, authentication flow, and database operations
-- helpers.py: Database setup, session-based helpers, password validation, and history retrieval
-- stockdata.py: Stock data retrieval and financial metric transformation
-- company_check.py: Company name-to-ticker resolution
-- templates/: User-facing HTML templates
-- static/: CSS and JavaScript assets
-
-## Finance angle
-
-The app is intentionally centered around fundamental analysis rather than speculative trading. It highlights concepts that matter in investment research:
-
-- Valuation metrics such as P/E and price-to-book
-- Profitability and growth indicators
-- Liquidity and balance sheet health
-- Cash flow as a measure of business quality
-
-That makes the project useful both as a software portfolio item and as a demonstration of financial literacy.
-
-## Setup
-
-### Prerequisites
-
-- Python 3.10+
-- A `.env` file with `SECRET_KEY` (the app creates a local SQLite database by default).
-
-Optional: set `DATABASE_URL` if you intend to use PostgreSQL or another external database (the repository currently uses SQLite; switching to PostgreSQL requires updating the database connection code).
-
-### Local development
-
-1. Clone the repository and enter the project folder:
-
-```bash
-git clone <repo-url>
-cd Fuatilia
+```
+fuatilia/
+├── app.py              # Flask routes — registration, login, search, company pages, portfolio
+├── stock_data.py        # StockData class — talks to the FMP API, builds and caches statement data
+├── helpers.py            # Database connection, schema setup, auth helpers, portfolio storage
+├── templates/
+│   ├── base.html          # Shared page shell (header block, main block, footer)
+│   ├── index.html         # Search landing page
+│   ├── search.html        # Search results
+│   ├── company.html       # Company profile + financial statements
+│   ├── login.html / register.html / reset.html
+│   └── portfolio.html     # Saved companies, sortable
+└── static/
+    ├── index.css           # Single stylesheet for the whole app
+    └── images/               # Screenshots used in this README
 ```
 
-2. Create and activate a virtual environment:
+---
 
-```bash
-python -m venv Fuatilia
-# Windows PowerShell
-.\Fuatilia\Scripts\Activate.ps1
-# macOS/Linux
-source Fuatilia/bin/activate
-```
+## Running it locally
 
-3. Install Python dependencies:
+1. Clone the repo and install dependencies:
+   ```
+   pip install -r requirements.txt
+   ```
+2. Create a `.env` file in the project root with:
+   ```
+   API_KEY=your_fmp_api_key
+   SECRET_KEY=your_flask_secret_key
+   ```
+3. Run the app:
+   ```
+   python app.py
+   ```
+4. The database (`fuatilia.db`) is created automatically on first run.
 
-```bash
-pip install -r requirements.txt
-```
+---
 
-4. Create a `.env` file in the project root with at minimum a `SECRET_KEY`.
+## Acknowledgements
 
-Example `.env` file in the project root (SQLite default):
-
-```env
-SECRET_KEY=your-secret-key
-# Optional: DATABASE_URL=postgresql://username:password@host:5432/dbname
-```
-
-The app will create its required tables automatically on startup via the database initialization logic in `helpers.py` (it creates a local `fundamentals.db` by default).
-
-5. Run the app locally:
-
-```bash
-python app.py
-```
-
-Then open the local URL shown by Flask, typically `http://127.0.0.1:5000/`.
-
-### Production / deployment notes
-
-This app is suitable for deployment on PythonAnywhere. Configure your PythonAnywhere WSGI file to import the Flask app from `app.py` and expose it as `application`.
-
-Example PythonAnywhere WSGI snippet:
-
-```python
-import sys
-import os
-path = '/home/yourusername/Fuatilia'
-if path not in sys.path:
-    sys.path.insert(0, path)
-
-from app import app as application
-```
-
-Then set `SECRET_KEY` in your PythonAnywhere web app environment variables. By default the app uses the local `fundamentals.db` SQLite file; if you want an external database, set `DATABASE_URL` and adapt the app's DB connection accordingly.
-
-## Notes
-
-This is a portfolio-scale web application rather than a full trading platform. The current scope focuses on stock lookup, fundamental data presentation, user accounts, saved research history, and basic history management features.
+Financial data provided by [Financial Modeling Prep](https://financialmodelingprep.com/).

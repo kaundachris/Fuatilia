@@ -5,7 +5,7 @@ from flask import Flask, render_template, request, session, redirect
 import os, bcrypt
 from jinja2 import Undefined
 from stock_data import StockData
-from helpers import get_db, initialize_db, status, check_password, store_financial_statements, update_user_portfolio, retrieve_user_portfolio
+from helpers import get_db, initialize_db, status, check_password, update_user_portfolio, retrieve_user_portfolio
 
 # initialize the app
 app = Flask(__name__)
@@ -57,7 +57,8 @@ def register():
     if password != confirm_password:
         return render_template("register.html", message="Passwords don't match")
 
-    with get_db() as db:
+    db = get_db()
+    try:
         # check that the username does not exist in database
         user = db.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
         if user:
@@ -78,8 +79,11 @@ def register():
             # Set user_id in session after successful login
             session["user_id"] = user["id"]
 
-    # close the connection
-    db.close()
+        # commit the changes
+        db.commit()
+
+    finally:
+        db.close()
 
     # store the user's search - if available - in their database
     symbol = session.get("last_symbol")
@@ -120,8 +124,9 @@ def login():
     if not password:
         return render_template("login.html", message="Please enter your username and password!")
 
-    # check that the username and password exist in database
-    with get_db() as db:
+    db = get_db()
+    try:
+        # check that the username and password exist in database
         user = db.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
 
         # check for existence of username
@@ -146,8 +151,8 @@ def login():
         if data:
             session["data"] = data
 
-    # close the connection
-    db.close()
+    finally:
+        db.close()
     
     # store the user's search - if available - in their database
     symbol = session.get("last_symbol")
@@ -189,7 +194,8 @@ def reset():
     if password != confirm_password:
         return render_template("reset.html", message="Passwords don't match")
 
-    with get_db() as db:
+    db = get_db()
+    try:
         # Ensure that the username exists in database
         user = db.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
         if not user:
@@ -210,8 +216,11 @@ def reset():
             # Set user_id in session after successful login
             session["user_id"] = user["id"]
 
-    # close the connection
-    db.close()
+        # commit the changes
+        db.commit()
+
+    finally:
+        db.close()
 
     # store the user's search - if available - in their database
     symbol = session.get("last_symbol")
@@ -276,8 +285,6 @@ def company():
     portfolio_data = {"profile_data": data["profile_data"], "ratio_data": data["ratio_data"]}
     session["data"] = portfolio_data
 
-    store_financial_statements(data, symbol)
-
     return render_template("company.html", **data, logged_in=status())
 
 
@@ -303,7 +310,6 @@ def portfolio():
 
     # store this in the database
     update_user_portfolio(data, symbol)
-    store_financial_statements(data, symbol)
 
     # render the page with the new entry
     return render_template("portfolio.html", portfolio=retrieve_user_portfolio())
