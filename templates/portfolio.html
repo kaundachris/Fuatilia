@@ -18,14 +18,18 @@
 </div>
 {% endblock %}
 
-<main>
-    {% block main %}
+
+{% block main %}
     <br>
     <br>
+
     <h3>Your Previous Queries</h3>
+
     <i class="more_info">To check for new data, click on the update button</i>
+
     <br>
     <br>
+    
     <i class="more_info">{{ message }}</i>
 
     <table>
@@ -138,6 +142,4 @@
             {% endfor %}
         </tbody>
     </table>
-    </div>
-    {% endblock %}
-</main>
+{% endblock %}

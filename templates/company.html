@@ -4,7 +4,7 @@
 <div class="header">
     <h1>Fuatilia</h1>
 
-    <div class="header">
+    <div class="nav">
         {% if logged_in %}
         <form action="/logout" method="get">
             <input name="login" id="login" hidden>
@@ -31,589 +31,585 @@
 </div>
 {% endblock %}
 
-<main>
-    {% block main %}
-        <div>
-            {% if profile_data %}
-                <h1>{{ profile_data.companyName }}</h1>
+{% block main %}
+    <div>
+        {% if profile_data %}
+            <h1>{{ profile_data.companyName }}</h1>
 
+        {% else %}
+            <p>Profile data unavailable for this company.</p>
+        {% endif %}
+    </div>
+    
+    <div>
+        {% if price_data %}
+            {{ price_data | safe }}
+    
+        {% else %}
+            <p>Price data unavailable for this company.</p>
+        {% endif %}
+    </div>
+
+    <div class="section">
+        <h3>Summary</h3>
+
+        <div class="profile_info">
+            {% if profile_data %}
+                <table>
+                    <tbody>
+                        <tr>
+                            <td class="label"><strong>Symbol</strong></td>
+                            <td class="value">{{ profile_data.symbol }}</td>
+                        </tr>
+
+                        <tr>
+                            <td class="label"><strong>Currency</strong></td>
+                            <td class="value">{{ profile_data.currency }}</td>
+                        </tr>
+
+                        <tr>
+                            <td class="label"><strong>Market Capitalization</strong></td>
+                            <td class="value">$ {{ profile_data.marketCap | currency_large }}</td>
+                        </tr>
+
+                        <tr>
+                            <td class="label"><strong>Exchange</strong></td>
+                            <td class="value">{{ profile_data.exchange }}</td>
+                        </tr>
+
+                        <tr>
+                            <td class="label"><strong>Industry</strong></td>
+                            <td class="value">{{ profile_data.industry }}</td>
+                        </tr>
+
+                        <tr>
+                            <td class="label"><strong>Country</strong></td>
+                            <td class="value">{{ profile_data.country }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            
             {% else %}
                 <p>Profile data unavailable for this company.</p>
                 
             {% endif %}
-        </div>
         
-        <div>
-            {% if price_data %}
-                {{ price_data | safe }}
-        
+            {% if ratio_data %}
+                <table>
+                    <tbody>
+                        <tr>
+                            <td class="label"><strong>Price to Earnings</strong></td>
+                            <td class="value">{{ ratio_data.priceToEarningsRatio | currency }}</td>
+                        </tr>
+
+                        <tr>
+                            <td class="label"><strong>Price to Book</strong></td>
+                            <td class="value">{{ ratio_data.priceToBookRatio | currency }}</td>
+                        </tr>
+
+                        <tr>
+                            <td class="label"><strong>Operating Profit Margin</strong></td>
+                            <td class="value">{{ ratio_data.operatingProfitMargin | currency }}</td>
+                        </tr>
+
+                        <tr>
+                            <td class="label"><strong>Dividend Yield (%)</strong></td>
+                            <td class="value">{{ ratio_data.dividendYieldPercentage | currency }}</td>
+                        </tr>
+
+                        <tr>
+                            <td class="label"><strong>Current Ratio</strong></td>
+                            <td class="value">{{ ratio_data.currentRatio | currency }}</td>
+                        </tr>
+
+                        <tr>
+                            <td class="label"><strong>Debt to Equity</strong></td>
+                            <td class="value">{{ ratio_data.debtToEquityRatio | currency }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
             {% else %}
-                <p>Price data unavailable for this company.</p>
-            
+                <p>Ratio data unavailable for this company.</p>
+                
             {% endif %}
         </div>
+    </div>
 
-        <div class="section">
-            <h3>Summary</h3>
+    <div class="section">
+        <h3>Income Statement</h3>
 
-            <div class="profile_info">
-                {% if profile_data %}
-                    <table>
-                        <tbody>
-                            <tr>
-                                <td class="label"><strong>Symbol</strong></td>
-                                <td class="value">{{ profile_data.symbol }}</td>
-                            </tr>
+        <table>
+            <thead>
+                <tr>
+                    <td class="key"><strong>Breakdown</strong></td>
 
-                            <tr>
-                                <td class="label"><strong>Currency</strong></td>
-                                <td class="value">{{ profile_data.currency }}</td>
-                            </tr>
+                    {% for year in income_data %}
+                        <td class="year">
+                            <strong>{{ year.fiscalYear }}</strong>
+                        </td>
+                    {% endfor %}
+                </tr>
+            </thead>
 
-                            <tr>
-                                <td class="label"><strong>Market Capitalization</strong></td>
-                                <td class="value">$ {{ profile_data.marketCap | currency_large }}</td>
-                            </tr>
+            <tbody>
+                <tr>
+                    <td class="key">Revenue</td>
 
-                            <tr>
-                                <td class="label"><strong>Exchange</strong></td>
-                                <td class="value">{{ profile_data.exchange }}</td>
-                            </tr>
+                    {% for year in income_data %}
+                        <td>
+                            {{ year.revenue | currency_large }}
+                        </td>
+                    {% endfor %}
+                </tr>
 
-                            <tr>
-                                <td class="label"><strong>Industry</strong></td>
-                                <td class="value">{{ profile_data.industry }}</td>
-                            </tr>
+                <tr>
+                    <td class="key">Cost Of Revenue</td>
 
-                            <tr>
-                                <td class="label"><strong>Country</strong></td>
-                                <td class="value">{{ profile_data.country }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    {% for year in income_data %}
+                        <td>
+                            {{ year.costOfRevenue | currency_large }}
+                        </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td class="key"><strong>Gross Profit</strong></td>
+
+                    {% for year in income_data %}
+                        <td>
+                            <strong>{{ year.grossProfit | currency_large }}</strong>
+                        </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td class="key">Selling, General and Admin Expenses</td>
+
+                    {% for year in income_data %}
+                        <td>
+                            {{ year.sellingGeneralAndAdministrativeExpenses | currency_large }}
+                        </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td class="key">R&D Expenses</td>
+
+                    {% for year in income_data %}
+                        <td>
+                            {{ year.researchAndDevelopmentExpenses | currency_large }}
+                        </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td class="key">Other Expenses</td>
+
+                    {% for year in income_data %}
+                        <td>
+                            {{ year.otherExpenses | currency_large }}
+                        </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td class="key"><strong>Operating Income</strong></td>
+
+                    {% for year in income_data %}
+                        <td>
+                            <strong>{{ year.operatingIncome | currency_large }}</strong>
+                        </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td class="key">Net of Other Income Expenses</td>
+
+                    {% for year in income_data %}
+                        <td>
+                            {{ year.totalOtherIncomeExpensesNet | currency_large }}
+                        </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td class="key">Income Before Tax</td>
+
+                    {% for year in income_data %}
+                        <td>
+                            {{ year.incomeBeforeTax | currency_large }}
+                        </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td class="key">Income Tax Expense</td>
+
+                    {% for year in income_data %}
+                        <td>
+                            {{ year.incomeTaxExpense | currency_large }}
+                        </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td class="key"><strong>Net Income</strong></td>
+
+                    {% for year in income_data %}
+                        <td>
+                            <strong>{{ year.netIncome | currency_large }}</strong>
+                        </td>
+                    {% endfor %}
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h3>Balance Sheet</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <td class="key"><strong>Breakdown</strong></td>
+
+                    {% for year in balance_sheet_data %}
+                        <td class="year">
+                            <strong>{{ year.fiscalYear }}</strong>
+                        </td>
+                    {% endfor %}
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <td class="key">Cash And Short-Term Investments</td>
+
+                    {% for year in balance_sheet_data %}
+                        <td>
+                            {{ year.cashAndShortTermInvestments | currency_large }}
+                        </td>
+                    {% endfor %}
+                </tr>
                 
-                {% else %}
-                    <p>Profile data unavailable for this company.</p>
-                    
-                {% endif %}
-            
-                {% if ratio_data %}
-                    <table>
-                        <tbody>
-                            <tr>
-                                <td class="label"><strong>Price to Earnings</strong></td>
-                                <td class="value">{{ ratio_data.priceToEarningsRatio | currency }}</td>
-                            </tr>
-
-                            <tr>
-                                <td class="label"><strong>Price to Book</strong></td>
-                                <td class="value">{{ ratio_data.priceToBookRatio | currency }}</td>
-                            </tr>
-
-                            <tr>
-                                <td class="label"><strong>Operating Profit Margin</strong></td>
-                                <td class="value">{{ ratio_data.operatingProfitMargin | currency }}</td>
-                            </tr>
-
-                            <tr>
-                                <td class="label"><strong>Dividend Yield (%)</strong></td>
-                                <td class="value">{{ ratio_data.dividendYieldPercentage | currency }}</td>
-                            </tr>
-
-                            <tr>
-                                <td class="label"><strong>Current Ratio</strong></td>
-                                <td class="value">{{ ratio_data.currentRatio | currency }}</td>
-                            </tr>
-
-                            <tr>
-                                <td class="label"><strong>Debt to Equity</strong></td>
-                                <td class="value">{{ ratio_data.debtToEquityRatio | currency }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                {% else %}
-                    <p>Ratio data unavailable for this company.</p>
-                    
-                {% endif %}
-            </div>
-        </div>
-
-        <div class="section">
-            <h3>Income Statement</h3>
-
-            <table>
-                <thead>
-                    <tr>
-                        <td class="key"><strong>Breakdown</strong></td>
-
-                        {% for year in income_data %}
-                            <td class="year">
-                                <strong>{{ year.fiscalYear }}</strong>
-                            </td>
-                        {% endfor %}
-                    </tr>
-                </thead>
-
-                <tbody>
-                    <tr>
-                        <td class="key">Revenue</td>
-
-                        {% for year in income_data %}
-                            <td>
-                                {{ year.revenue | currency_large }}
-                            </td>
-                        {% endfor %}
-                    </tr>
-
-                    <tr>
-                        <td class="key">Cost Of Revenue</td>
-
-                        {% for year in income_data %}
-                            <td>
-                                {{ year.costOfRevenue | currency_large }}
-                            </td>
-                        {% endfor %}
-                    </tr>
-
-                    <tr>
-                        <td class="key"><strong>Gross Profit</strong></td>
-
-                        {% for year in income_data %}
-                            <td>
-                                <strong>{{ year.grossProfit | currency_large }}</strong>
-                            </td>
-                        {% endfor %}
-                    </tr>
-
-                    <tr>
-                        <td class="key">Selling, General and Admin Expenses</td>
-
-                        {% for year in income_data %}
-                            <td>
-                                {{ year.sellingGeneralAndAdministrativeExpenses | currency_large }}
-                            </td>
-                        {% endfor %}
-                    </tr>
-
-                    <tr>
-                        <td class="key">R&D Expenses</td>
-
-                        {% for year in income_data %}
-                            <td>
-                                {{ year.researchAndDevelopmentExpenses | currency_large }}
-                            </td>
-                        {% endfor %}
-                    </tr>
-
-                    <tr>
-                        <td class="key">Other Expenses</td>
-
-                        {% for year in income_data %}
-                            <td>
-                                {{ year.otherExpenses | currency_large }}
-                            </td>
-                        {% endfor %}
-                    </tr>
-
-                    <tr>
-                        <td class="key"><strong>Operating Income</strong></td>
-
-                        {% for year in income_data %}
-                            <td>
-                                <strong>{{ year.operatingIncome | currency_large }}</strong>
-                            </td>
-                        {% endfor %}
-                    </tr>
-
-                    <tr>
-                        <td class="key">Net of Other Income Expenses</td>
-
-                        {% for year in income_data %}
-                            <td>
-                                {{ year.totalOtherIncomeExpensesNet | currency_large }}
-                            </td>
-                        {% endfor %}
-                    </tr>
-
-                    <tr>
-                        <td class="key">Income Before Tax</td>
-
-                        {% for year in income_data %}
-                            <td>
-                                {{ year.incomeBeforeTax | currency_large }}
-                            </td>
-                        {% endfor %}
-                    </tr>
-
-                    <tr>
-                        <td class="key">Income Tax Expense</td>
-
-                        {% for year in income_data %}
-                            <td>
-                                {{ year.incomeTaxExpense | currency_large }}
-                            </td>
-                        {% endfor %}
-                    </tr>
-
-                    <tr>
-                        <td class="key"><strong>Net Income</strong></td>
-
-                        {% for year in income_data %}
-                            <td>
-                                <strong>{{ year.netIncome | currency_large }}</strong>
-                            </td>
-                        {% endfor %}
-                    </tr>
-
-                </tbody>
-            </table>
-        </div>
-
-        <div class="section">
-            <h3>Balance Sheet</h3>
-
-            <table>
-                <thead>
-                    <tr>
-                        <td class="key"><strong>Breakdown</strong></td>
-
-                        {% for year in balance_sheet_data %}
-                            <td class="year">
-                                <strong>{{ year.fiscalYear }}</strong>
-                            </td>
-                        {% endfor %}
-                    </tr>
-                </thead>
-
-                <tbody>
-                    <tr>
-                        <td class="key">Cash And Short-Term Investments</td>
-
-                        {% for year in balance_sheet_data %}
-                            <td>
-                                {{ year.cashAndShortTermInvestments | currency_large }}
-                            </td>
-                        {% endfor %}
-                    </tr>
-                    
-                    <tr>
-                        <td class="key">Net Receivables</td>
-
-                        {% for year in balance_sheet_data %}
-                            <td>
-                                {{ year.netReceivables | currency_large }}
-                            </td>
-                        {% endfor %}
-                    </tr>
-
-                    <tr>
-                        <td class="key">Inventory</td>
-
-                        {% for year in balance_sheet_data %}
-                            <td>
-                                {{ year.inventory | currency_large }}
-                            </td>
-                        {% endfor %}
-                    </tr>
-
-                    <tr>
-                        <td class="key">Other Current Assets</td>
-
-                        {% for year in balance_sheet_data %}
-                            <td>
-                                {{ ((year.prepaids or 0) + (year.otherCurrentAssets or 0)) | currency_large }}
-                            </td>
-                        {% endfor %}
-                    </tr>
-
-                    <tr>
-                        <td class="key">Net PPE</td>
-
-                        {% for year in balance_sheet_data %}
-                            <td>
-                                {{ year.propertyPlantEquipmentNet | currency_large }}
-                            </td>
-                        {% endfor %}
-                    </tr>
-
-                    <tr>
-                        <td class="key">Goodwill And Intangible Assets</td>
-
-                        {% for year in balance_sheet_data %}
-                            <td>
-                                {{ year.goodwillAndIntangibleAssets | currency_large }}
-                            </td>
-                        {% endfor %}
-                    </tr>
-
-                    <tr>
-                        <td class="key">Long Term Investments</td>
-
-                        {% for year in balance_sheet_data %}
-                            <td>
-                                {{ year.longTermInvestments | currency_large }}
-                            </td>
-                        {% endfor %}
-                    </tr>
-
-                    <tr>
-                        <td class="key">Other Non Current Assets</td>
-
-                        {% for year in balance_sheet_data %}
-                            <td>
-                                {{ ((year.taxAssets or 0) + (year.otherNonCurrentAssets or 0) +(year.otherAssets)) | currency_large }}
-                            </td>
-                        {% endfor %}
-                    </tr>
-
-                    <tr>
-                        <td class="key"><strong>Total Assets</strong></td>
-
-                        {% for year in balance_sheet_data %}
-                            <td>
-                                <strong>{{ year.totalAssets | currency_large }}</strong>
-                            </td>
-                        {% endfor %}
-                    </tr>
-
-                    <tr>
-                        <td class="key">Total Payables</td>
-
-                        {% for year in balance_sheet_data %}
-                            <td>
-                                {{ ((year.totalPayables or 0) + (year.accruedExpenses or 0)) | currency_large }}
-                            </td>
-                        {% endfor %}
-                    </tr>
-
-                    <tr>
-                        <td class="key">Short Term Debt</td>
-
-                        {% for year in balance_sheet_data %}
-                            <td>
-                                {{ year.shortTermDebt | currency_large }}
-                            </td>
-                        {% endfor %}
-                    </tr>
-
-                    <tr>
-                        <td class="key">Deferred Revenue</td>
-
-                        {% for year in balance_sheet_data %}
-                            <td>
-                                {{ year.deferredRevenue | currency_large }}
-                            </td>
-                        {% endfor %}
-                    </tr>
-
-                    <tr>
-                        <td class="key">Other Current Liabilities</td>
-
-                        {% for year in balance_sheet_data %}
-                            <td>
-                                {{ ((year.taxPayables or 0) + (year.otherCurrentLiabilities or 0) +
-                                    (year.capitalLeaseObligationsCurrent or 0)) | currency_large }}
-                            </td>
-                        {% endfor %}
-                    </tr>
-
-                    <tr>
-                        <td class="key">Long Term Debt</td>
-
-                        {% for year in balance_sheet_data %}
-                            <td>
-                                {{ year.longTermDebt | currency_large }}
-                            </td>
-                        {% endfor %}
-                    </tr>
-
-                    <tr>
-                        <td class="key">Capital Lease Obligations (Non-Current)</td>
-
-                        {% for year in balance_sheet_data %}
-                            <td>
-                                {{ year.capitalLeaseObligationsNonCurrent | currency_large }}
-                            </td>
-                        {% endfor %}
-                    </tr>
-
-                    <tr>
-                        <td class="key">Other Non-Current Liabilities</td>
-
-                        {% for year in balance_sheet_data %}
-                            <td>
-                                {{ ((year.otherNonCurrentLiabilities or 0) + (year.deferredRevenueNonCurrent or 0) +
-                                    (year.deferredTaxLiabilitiesNonCurrent or 0) + (year.otherLiabilities or 0))| currency_large }}
-                            </td>
-                        {% endfor %}
-                    </tr>
-
-                    <tr>
-                        <td class="key">Equity</td>
-
-                        {% for year in balance_sheet_data %}
-                            <td>
-                                {{ ((year.treasuryStock or 0) + (year.preferredStock or 0) + (year.commonStock or 0) +
-                                    (year.additionalPaidInCapital or 0) + (year.otherTotalStockholdersEquity or 0)) | currency_large }}
-                            </td>
-                        {% endfor %}
-                    </tr>
-
-                    <tr>
-                        <td class="key">Retained Earnings</td>
-
-                        {% for year in balance_sheet_data %}
-                            <td>
-                                {{ year.retainedEarnings | currency_large }}
-                            </td>
-                        {% endfor %}
-                    </tr>
-
-                    <tr>
-                        <td class="key">Accumulated Other Comprehensive Income/Loss</td>
-
-                        {% for year in balance_sheet_data %}
-                            <td>
-                                {{ year.accumulatedOtherComprehensiveIncomeLoss | currency_large }}
-                            </td>
-                        {% endfor %}
-                    </tr>
-
-                    <tr>
-                        <td class="key">Minority Interest</td>
-
-                        {% for year in balance_sheet_data %}
-                            <td>
-                                {{ year.minorityInterest | currency_large }}
-                            </td>
-                        {% endfor %}
-                    </tr>
-
-                    <tr>
-                        <td class="key"><strong>Equity and Liabilities</td></strong>
-
-                        {% for year in balance_sheet_data %}
-                            <td>
-                                <strong>{{ year.totalLiabilitiesAndTotalEquity | currency_large }}</strong>
-                            </td>
-                        {% endfor %}
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="section">
-            <h3>Cashflow Statement</h3>
-
-            <table>
-                <thead>
-                    <tr>
-                        <td class="key"><strong>Breakdown</strong></td>
-
-                        {% for year in cashflow_data %}
-                            <td class="year">
-                                <strong>{{ year.fiscalYear }}</strong>
-                            </td>
-                        {% endfor %}
-                    </tr>
-                </thead>
-
-                <tbody>
-                    <tr>
-                        <td class="key">Cash At Beginning Of Period</td>
-
-                        {% for year in cashflow_data %}
-                            <td>
-                                {{ year.cashAtBeginningOfPeriod | currency_large }}
-                            </td>
-                        {% endfor %}
-                    </tr>
-
-                    <tr>
-                        <td class="key">Net Cash, Operating Activities</td>
-
-                        {% for year in cashflow_data %}
-                            <td>
-                                {{ year.netCashProvidedByOperatingActivities | currency_large }}
-                            </td>
-                        {% endfor %}
-                    </tr>
-                    
-                    <tr>
-                        <td class="key">Net Cash, Investing Activities</td>
-
-                        {% for year in cashflow_data %}
-                            <td>
-                                {{ year.netCashProvidedByInvestingActivities | currency_large }}
-                            </td>
-                        {% endfor %}
-                    </tr>
-
-                    <tr>
-                        <td class="key">Net Cash, Financing Activities</td>
-
-                        {% for year in cashflow_data %}
-                            <td>
-                                {{ year.netCashProvidedByFinancingActivities | currency_large }}
-                            </td>
-                        {% endfor %}
-                    </tr>
-
-                    <tr>
-                        <td class="key">Effect Of Forex Changes On Cash</td>
-
-                        {% for year in cashflow_data %}
-                            <td>
-                                {{ year.effectOfForexChangesOnCash | currency_large }}
-                            </td>
-                        {% endfor %}
-                    </tr>
-
-                    <tr>
-                        <td class="key"><strong>Cash At End Of Period</strong></td>
-
-                        {% for year in cashflow_data %}
-                            <td>
-                                <strong>{{ year.cashAtEndOfPeriod | currency_large }}</strong>
-                            </td>
-                        {% endfor %}
-                    </tr>
-
-                    <tr>
-                        <td class="key">Capital Expenditure</td>
-
-                        {% for year in cashflow_data %}
-                            <td>
-                                {{ year.capitalExpenditure | currency_large }}
-                            </td>
-                        {% endfor %}
-                    </tr>
-
-                    <tr>
-                        <td class="key"><strong>Free Cash Flow</strong></td>
-
-                        {% for year in cashflow_data %}
-                            <td>
-                                <strong>{{ year.freeCashFlow | currency_large }}</strong>
-                            </td>
-                        {% endfor %}
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        
-        <div class="company_nav">
-            <form action="/" method="get">
-                <input name="index" id="index" hidden>
-                <input type="submit" name="submit" id="submit" value="New Search">
-            </form>
-
-            <form action="/portfolio" method="post">
-                <input name="portfolio" id="portfolio" hidden>
-                <input type="submit" name="submit" id="submit" value="Add to portfolio">
-            </form>
-        </div>
-
-    {% endblock %}
-</main>
+                <tr>
+                    <td class="key">Net Receivables</td>
+
+                    {% for year in balance_sheet_data %}
+                        <td>
+                            {{ year.netReceivables | currency_large }}
+                        </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td class="key">Inventory</td>
+
+                    {% for year in balance_sheet_data %}
+                        <td>
+                            {{ year.inventory | currency_large }}
+                        </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td class="key">Other Current Assets</td>
+
+                    {% for year in balance_sheet_data %}
+                        <td>
+                            {{ ((year.prepaids or 0) + (year.otherCurrentAssets or 0)) | currency_large }}
+                        </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td class="key">Net PPE</td>
+
+                    {% for year in balance_sheet_data %}
+                        <td>
+                            {{ year.propertyPlantEquipmentNet | currency_large }}
+                        </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td class="key">Goodwill And Intangible Assets</td>
+
+                    {% for year in balance_sheet_data %}
+                        <td>
+                            {{ year.goodwillAndIntangibleAssets | currency_large }}
+                        </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td class="key">Long Term Investments</td>
+
+                    {% for year in balance_sheet_data %}
+                        <td>
+                            {{ year.longTermInvestments | currency_large }}
+                        </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td class="key">Other Non Current Assets</td>
+
+                    {% for year in balance_sheet_data %}
+                        <td>
+                            {{ ((year.taxAssets or 0) + (year.otherNonCurrentAssets or 0) +(year.otherAssets)) | currency_large }}
+                        </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td class="key"><strong>Total Assets</strong></td>
+
+                    {% for year in balance_sheet_data %}
+                        <td>
+                            <strong>{{ year.totalAssets | currency_large }}</strong>
+                        </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td class="key">Total Payables</td>
+
+                    {% for year in balance_sheet_data %}
+                        <td>
+                            {{ ((year.totalPayables or 0) + (year.accruedExpenses or 0)) | currency_large }}
+                        </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td class="key">Short Term Debt</td>
+
+                    {% for year in balance_sheet_data %}
+                        <td>
+                            {{ year.shortTermDebt | currency_large }}
+                        </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td class="key">Deferred Revenue</td>
+
+                    {% for year in balance_sheet_data %}
+                        <td>
+                            {{ year.deferredRevenue | currency_large }}
+                        </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td class="key">Other Current Liabilities</td>
+
+                    {% for year in balance_sheet_data %}
+                        <td>
+                            {{ ((year.taxPayables or 0) + (year.otherCurrentLiabilities or 0) +
+                                (year.capitalLeaseObligationsCurrent or 0)) | currency_large }}
+                        </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td class="key">Long Term Debt</td>
+
+                    {% for year in balance_sheet_data %}
+                        <td>
+                            {{ year.longTermDebt | currency_large }}
+                        </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td class="key">Capital Lease Obligations (Non-Current)</td>
+
+                    {% for year in balance_sheet_data %}
+                        <td>
+                            {{ year.capitalLeaseObligationsNonCurrent | currency_large }}
+                        </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td class="key">Other Non-Current Liabilities</td>
+
+                    {% for year in balance_sheet_data %}
+                        <td>
+                            {{ ((year.otherNonCurrentLiabilities or 0) + (year.deferredRevenueNonCurrent or 0) +
+                                (year.deferredTaxLiabilitiesNonCurrent or 0) + (year.otherLiabilities or 0))| currency_large }}
+                        </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td class="key">Equity</td>
+
+                    {% for year in balance_sheet_data %}
+                        <td>
+                            {{ ((year.treasuryStock or 0) + (year.preferredStock or 0) + (year.commonStock or 0) +
+                                (year.additionalPaidInCapital or 0) + (year.otherTotalStockholdersEquity or 0)) | currency_large }}
+                        </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td class="key">Retained Earnings</td>
+
+                    {% for year in balance_sheet_data %}
+                        <td>
+                            {{ year.retainedEarnings | currency_large }}
+                        </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td class="key">Accumulated Other Comprehensive Income/Loss</td>
+
+                    {% for year in balance_sheet_data %}
+                        <td>
+                            {{ year.accumulatedOtherComprehensiveIncomeLoss | currency_large }}
+                        </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td class="key">Minority Interest</td>
+
+                    {% for year in balance_sheet_data %}
+                        <td>
+                            {{ year.minorityInterest | currency_large }}
+                        </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td class="key"><strong>Equity and Liabilities</strong></td>
+
+                    {% for year in balance_sheet_data %}
+                        <td>
+                            <strong>{{ year.totalLiabilitiesAndTotalEquity | currency_large }}</strong>
+                        </td>
+                    {% endfor %}
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h3>Cashflow Statement</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <td class="key"><strong>Breakdown</strong></td>
+
+                    {% for year in cashflow_data %}
+                        <td class="year">
+                            <strong>{{ year.fiscalYear }}</strong>
+                        </td>
+                    {% endfor %}
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <td class="key">Cash At Beginning Of Period</td>
+
+                    {% for year in cashflow_data %}
+                        <td>
+                            {{ year.cashAtBeginningOfPeriod | currency_large }}
+                        </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td class="key">Net Cash, Operating Activities</td>
+
+                    {% for year in cashflow_data %}
+                        <td>
+                            {{ year.netCashProvidedByOperatingActivities | currency_large }}
+                        </td>
+                    {% endfor %}
+                </tr>
+                
+                <tr>
+                    <td class="key">Net Cash, Investing Activities</td>
+
+                    {% for year in cashflow_data %}
+                        <td>
+                            {{ year.netCashProvidedByInvestingActivities | currency_large }}
+                        </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td class="key">Net Cash, Financing Activities</td>
+
+                    {% for year in cashflow_data %}
+                        <td>
+                            {{ year.netCashProvidedByFinancingActivities | currency_large }}
+                        </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td class="key">Effect Of Forex Changes On Cash</td>
+
+                    {% for year in cashflow_data %}
+                        <td>
+                            {{ year.effectOfForexChangesOnCash | currency_large }}
+                        </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td class="key"><strong>Cash At End Of Period</strong></td>
+
+                    {% for year in cashflow_data %}
+                        <td>
+                            <strong>{{ year.cashAtEndOfPeriod | currency_large }}</strong>
+                        </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td class="key">Capital Expenditure</td>
+
+                    {% for year in cashflow_data %}
+                        <td>
+                            {{ year.capitalExpenditure | currency_large }}
+                        </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td class="key"><strong>Free Cash Flow</strong></td>
+
+                    {% for year in cashflow_data %}
+                        <td>
+                            <strong>{{ year.freeCashFlow | currency_large }}</strong>
+                        </td>
+                    {% endfor %}
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="company_nav">
+        <form action="/" method="get">
+            <input name="index" id="index" hidden>
+            <input type="submit" name="submit" id="submit" value="New Search">
+        </form>
+
+        <form action="/portfolio" method="post">
+            <input name="portfolio" id="portfolio" hidden>
+            <input type="submit" name="submit" id="submit" value="Add to portfolio">
+        </form>
+    </div>
+
+{% endblock %}
