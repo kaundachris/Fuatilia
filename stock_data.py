@@ -27,17 +27,28 @@ class StockData():
         self.session = requests.Session()
 
 
-    def build_query(self, endpoint):
+    def build_query(self, endpoint, search_query=None):
         """Builds the links you use to call data from the API"""
 
-        # check that the symbol is present
-        if self.symbol is None:
-            raise ValueError("Symbol parameter is missing")
+        # check for any search query
+        if search_query:
+            query = search_query
 
-        # create the query
-        link = f"{self.BASE_URL}{endpoint}{self.symbol}&apikey={self.API_KEY}"
+            # create the query
+            link = f"{self.BASE_URL}{endpoint}{query}&apikey={self.API_KEY}"
+            
+            return link
 
-        return link
+        # else, check that the symbol is present
+        if self.symbol:
+            query = self.symbol
+
+            # create the query
+            link = f"{self.BASE_URL}{endpoint}{query}&apikey={self.API_KEY}"
+
+            return link
+
+        raise ValueError("Symbol parameter is missing")        
 
 
     def api_call(self, link, identifier):
@@ -57,7 +68,7 @@ class StockData():
         """Gets the symbol for the company searched"""
 
         # create the query
-        link = f"{self.BASE_URL}{self.SEARCH_ENDPOINT}{query}&apikey={self.API_KEY}"
+        link = self.build_query(self.SEARCH_ENDPOINT, query)
 
         # call the API
         search_data = self.api_call(link, query)
@@ -88,6 +99,21 @@ class StockData():
             fetched_data = None
 
         return fetched_data
+    
+
+    def build_data_dict(self, profile_data, price_data, income_data, balance_sheet_data, cashflow_data, ratio_data):
+        """stores data into a dictionary for easy access"""
+
+        data= {
+            "profile_data": profile_data,
+            "price_data": price_data,
+            "income_data": income_data,
+            "balance_sheet_data": balance_sheet_data,
+            "cashflow_data": cashflow_data,
+            "ratio_data": ratio_data
+            }
+
+        return data
 
 
     def price_chart(self):
@@ -158,14 +184,10 @@ class StockData():
             if ratio_data:
                 ratio_data = ratio_data[0]
 
-            data = {
-                    "profile_data": profile_data,
-                    "price_data": price_data,
-                    "income_data": income_data,
-                    "balance_sheet_data": balance_sheet_data,
-                    "cashflow_data": cashflow_data,
-                    "ratio_data": ratio_data
-                    }
+            data = self.build_data_dict(profile_data, price_data, income_data, balance_sheet_data, cashflow_data, ratio_data)
+
+            # store the new data
+            store_financial_statements(data, self.symbol)
     
             return data
 
@@ -216,14 +238,7 @@ class StockData():
         
         db.close()
 
-        data = {
-                "profile_data": profile_data,
-                "price_data": price_data,
-                "income_data": income_data,
-                "balance_sheet_data": balance_sheet_data,
-                "cashflow_data": cashflow_data,
-                "ratio_data": ratio_data
-                }
+        data = self.build_data_dict(profile_data, price_data, income_data, balance_sheet_data, cashflow_data, ratio_data)
 
         # if new data was called, store the data
         if rewrite:
