@@ -27,11 +27,6 @@ h1 {
 }
 
 /*main styling*/
-main {
-    margin: 10px;
-    padding: 10px;
-}
-
 .more_info, .label, .key, .year {
     color:rgb(10, 136, 179);
 }
@@ -42,10 +37,10 @@ main {
 }
 
 .section {
-    background-color: rgb(10, 10, 10);
+    background-color: rgb(40, 40, 40);
     border-radius: 10px;
-    margin: 20px;
-    padding: 20px;
+    padding: 5px;
+    margin-top: 20px;
 }
 
 .profile_info {
@@ -101,7 +96,7 @@ button[name="submit"]:hover {
 table {
     width: 100%;
     margin-top: 10px;
-    margin-bottom: 50px;
+    margin-bottom: 10px;
     table-layout: fixed;
 }
 
