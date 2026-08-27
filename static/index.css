@@ -27,11 +27,6 @@ h1 {
 }
 
 /*main styling*/
-main {
-    margin: 10px;
-    padding: 10px;
-}
-
 .more_info, .label, .key, .year {
     color:rgb(10, 136, 179);
 }
