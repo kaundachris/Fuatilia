@@ -53,87 +53,89 @@
     <div class="section">
         <h3>Summary</h3>
 
-        <div class="profile_info">
-            {% if profile_data %}
-                <table>
-                    <tbody>
-                        <tr>
-                            <td class="label"><strong>Symbol</strong></td>
-                            <td class="value">{{ profile_data.symbol }}</td>
-                        </tr>
+        {% if profile_data %}
+            <table>
+                <tbody>
+                    <tr>
+                        <td class="label"><strong>Symbol</strong></td>
+                        <td class="value">{{ profile_data.symbol }}</td>
+                    </tr>
 
-                        <tr>
-                            <td class="label"><strong>Currency</strong></td>
-                            <td class="value">{{ profile_data.currency }}</td>
-                        </tr>
+                    <tr>
+                        <td class="label"><strong>Currency</strong></td>
+                        <td class="value">{{ profile_data.currency }}</td>
+                    </tr>
 
-                        <tr>
-                            <td class="label"><strong>Market Capitalization</strong></td>
-                            <td class="value">$ {{ profile_data.marketCap | currency_large }}</td>
-                        </tr>
+                    <tr>
+                        <td class="label"><strong>Market Cap</strong></td>
+                        <td class="value">$ {{ profile_data.marketCap | currency_large }}</td>
+                    </tr>
 
-                        <tr>
-                            <td class="label"><strong>Exchange</strong></td>
-                            <td class="value">{{ profile_data.exchange }}</td>
-                        </tr>
+                    <tr>
+                        <td class="label"><strong>Exchange</strong></td>
+                        <td class="value">{{ profile_data.exchange }}</td>
+                    </tr>
 
-                        <tr>
-                            <td class="label"><strong>Industry</strong></td>
-                            <td class="value">{{ profile_data.industry }}</td>
-                        </tr>
+                    <tr>
+                        <td class="label"><strong>Industry</strong></td>
+                        <td class="value">{{ profile_data.industry }}</td>
+                    </tr>
 
-                        <tr>
-                            <td class="label"><strong>Country</strong></td>
-                            <td class="value">{{ profile_data.country }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            
-            {% else %}
-                <p>Profile data unavailable for this company.</p>
-                
-            {% endif %}
+                    <tr>
+                        <td class="label"><strong>Country</strong></td>
+                        <td class="value">{{ profile_data.country }}</td>
+                    </tr>
+                </tbody>
+            </table>
         
-            {% if ratio_data %}
-                <table>
-                    <tbody>
-                        <tr>
-                            <td class="label"><strong>Price to Earnings</strong></td>
-                            <td class="value">{{ ratio_data.priceToEarningsRatio | currency }}</td>
-                        </tr>
+        {% else %}
+            <p>Profile data unavailable for this company.</p>
+            
+        {% endif %}
+    </div>
 
-                        <tr>
-                            <td class="label"><strong>Price to Book</strong></td>
-                            <td class="value">{{ ratio_data.priceToBookRatio | currency }}</td>
-                        </tr>
+    <div class="section">
+        <h3>Valuation Snapshot</h3>
 
-                        <tr>
-                            <td class="label"><strong>Operating Profit Margin</strong></td>
-                            <td class="value">{{ ratio_data.operatingProfitMargin | currency }}</td>
-                        </tr>
+        {% if ratio_data %}
+            <table>
+                <tbody>
+                    <tr>
+                        <td class="label"><strong>Price to Earnings</strong></td>
+                        <td class="value">{{ ratio_data.priceToEarningsRatio | currency }}</td>
+                    </tr>
 
-                        <tr>
-                            <td class="label"><strong>Dividend Yield (%)</strong></td>
-                            <td class="value">{{ ratio_data.dividendYieldPercentage | currency }}</td>
-                        </tr>
+                    <tr>
+                        <td class="label"><strong>Price to Book</strong></td>
+                        <td class="value">{{ ratio_data.priceToBookRatio | currency }}</td>
+                    </tr>
 
-                        <tr>
-                            <td class="label"><strong>Current Ratio</strong></td>
-                            <td class="value">{{ ratio_data.currentRatio | currency }}</td>
-                        </tr>
+                    <tr>
+                        <td class="label"><strong>Operating Profit</strong></td>
+                        <td class="value">{{ ((ratio_data.operatingProfitMargin * 100) or 0) | currency }}%</td>
+                    </tr>
 
-                        <tr>
-                            <td class="label"><strong>Debt to Equity</strong></td>
-                            <td class="value">{{ ratio_data.debtToEquityRatio | currency }}</td>
-                        </tr>
-                    </tbody>
-                </table>
+                    <tr>
+                        <td class="label"><strong>Dividend Yield</strong></td>
+                        <td class="value">{{ ratio_data.dividendYieldPercentage | currency }}%</td>
+                    </tr>
 
-            {% else %}
-                <p>Ratio data unavailable for this company.</p>
-                
-            {% endif %}
-        </div>
+                    <tr>
+                        <td class="label"><strong>Current Ratio</strong></td>
+                        <td class="value">{{ ratio_data.currentRatio | currency }}</td>
+                    </tr>
+
+                    <tr>
+                        <td class="label"><strong>Debt to Equity</strong></td>
+                        <td class="value">{{ ratio_data.debtToEquityRatio | currency }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+        {% else %}
+            <p>Ratio data unavailable for this company.</p>
+            
+        {% endif %}
     </div>
 
     <div class="section">
