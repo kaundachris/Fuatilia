@@ -5,7 +5,8 @@ from datetime import date
 
 def get_db():
     """creates or opens the database connection"""
-    connection = sqlite3.connect(os.path.join(os.path.dirname(__file__), "fuatilia.db"))
+    db_path = os.environ.get("DB_PATH", os.path.join(os.path.dirname(__file__), "fuatilia.db"))
+    connection = sqlite3.connect(db_path)
 
     # return rows as dictionary-like objects for easy parsing
     connection.row_factory = sqlite3.Row

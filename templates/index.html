@@ -7,12 +7,12 @@
     <div class="nav">
         {% if logged_in %}
         <form action="/portfolio" method="get">
-            <input name="register" id="register" hidden>
+            <input name="portfolio" id="portfolio" hidden>
             <input type="submit" name="submit" id="submit" value="Previous Searches">
         </form>
 
         <form action="/logout" method="get">
-            <input name="login" id="login" hidden>
+            <input name="logout" id="logout" hidden>
             <input type="submit" name="submit" id="submit" value="Log Out">
         </form>
 
