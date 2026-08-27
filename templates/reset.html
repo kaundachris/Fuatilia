@@ -10,9 +10,9 @@
             <input type="submit" name="submit" id="submit" value="Search">
         </form>
 
-        <form action="/login" method="get">
-            <input name="register" id="register" hidden>
-            <input type="submit" name="submit" id="submit" value="Log In">
+        <form action="/logout" method="get">
+            <input name="logout" id="logout" hidden>
+            <input type="submit" name="submit" id="submit" value="Log Out">
         </form>
     </div>
 </div>
@@ -24,16 +24,15 @@
 
     <form action="/reset" method="post">
         <div>
-            <input type="email" name="username" id="username" autofocus autocomplete="off" placeholder="Enter your email">
-        </div>
-        <div>
             <input type="password" name="password" id="password" autofocus autocomplete="off"
                 placeholder="Must contain at least one number and one letter">
         </div>
+
         <div>
             <input type="password" name="confirm_password" id="confirm_password" autofocus autocomplete="off"
                 placeholder="Must match with the password entered above">
         </div>
+
         <div>
             <input type="submit" name="submit" id="submit" value="Reset Password">
         </div>

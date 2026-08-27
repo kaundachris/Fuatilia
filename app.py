@@ -166,15 +166,13 @@ def login():
 
 @app.route("/reset", methods=["GET", "POST"])
 def reset():
+    # check that the user is logged in
+    if "user_id" not in session:
+        return redirect("/login")
+
     # if from other pages
     if request.method == "GET":
         return render_template("reset.html")
-
-    # check that username field is not empty
-    username = request.form.get("username")
-    if not username:
-        return render_template("reset.html", message="Please enter your username!")
-    username = username.lower()
 
     # check that the password field is not empty
     password = request.form.get("password")
@@ -197,24 +195,20 @@ def reset():
     db = get_db()
     try:
         # Ensure that the username exists in database
-        user = db.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
+        user = db.execute("SELECT * FROM users WHERE id = ?", (session["user_id"],)).fetchone()
         if not user:
-            return render_template("reset.html", message="Username does not exist")
+            return render_template("reset.html", message="User not found")
+
+        # ensure the password is actually new
+        if bcrypt.checkpw(password.encode("utf-8"), user["password_hash"].encode("utf-8")):
+            return render_template("reset.html", message="Enter a new password!")
 
         # hash the password
         hash_pw = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
 
         # add the new password to the user's database
-        db.execute("UPDATE users SET password_hash = ? WHERE username = ?",
-                (hash_pw.decode("utf-8"), username))
-
-        # get user's id
-        user = db.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
-
-        # Check that user has data
-        if user:
-            # Set user_id in session after successful login
-            session["user_id"] = user["id"]
+        db.execute("UPDATE users SET password_hash = ? WHERE id = ?",
+                (hash_pw.decode("utf-8"), session["user_id"]))
 
         # commit the changes
         db.commit()

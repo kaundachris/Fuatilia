@@ -6,26 +6,26 @@
 
     <div class="nav">
         {% if logged_in %}
-        <form action="/logout" method="get">
-            <input name="login" id="login" hidden>
-            <input type="submit" name="submit" id="submit" value="Log Out">
-        </form>
+            <form action="/reset" method="get">
+                <input name="reset" id="reset" hidden>
+                <input type="submit" name="submit" id="submit" value="Reset Password">
+            </form>
 
-        <form action="/" method="get">
-            <input name="search" id="search" hidden>
-            <input type="submit" name="submit" id="submit" value="Search">
-        </form>
+            <form action="/logout" method="get">
+                <input name="logout" id="logout" hidden>
+                <input type="submit" name="submit" id="submit" value="Log Out">
+            </form>
 
         {% else %}
-        <form action="/login" method="get">
-            <input name="login" id="login" hidden>
-            <input type="submit" name="submit" id="submit" value="Log In">
-        </form>
+            <form action="/login" method="get">
+                <input name="login" id="login" hidden>
+                <input type="submit" name="submit" id="submit" value="Log In">
+            </form>
 
-        <form action="/register" method="get">
-            <input name="register" id="register" hidden>
-            <input type="submit" name="submit" id="submit" value="Register">
-        </form>
+            <form action="/register" method="get">
+                <input name="register" id="register" hidden>
+                <input type="submit" name="submit" id="submit" value="Register">
+            </form>
         {% endif %}
     </div>
 </div>
