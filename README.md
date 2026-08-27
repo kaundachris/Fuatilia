@@ -2,7 +2,7 @@
 
 Fuatilia ("to track/follow" in Swahili) is a web app for looking up US-listed companies and reviewing their key financial statements — income statement, balance sheet, and cashflow statement — pulled live from [Financial Modeling Prep](https://financialmodelingprep.com/) (FMP). Registered users can save companies to a personal portfolio and sort them by financial ratios.
 
-Built by [Chris Kaunda](https://www.linkedin.com/in/chriskaunda/) as a project to learn programming from the ground up, with a focus on connecting a finance background to real code.
+Built as a project to learn programming from the ground up, with a focus on connecting a finance background to real code.
 
 ---
 
