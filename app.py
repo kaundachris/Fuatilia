@@ -10,6 +10,8 @@ from helpers import get_db, initialize_db, status, check_password, update_user_p
 # initialize the app
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY")
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_SECURE"] = os.environ.get("FLASK_DEBUG") != "1"
 initialize_db()
 
 # jinja will use this to format numbers into currency
