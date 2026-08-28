@@ -32,6 +32,8 @@
 {% endblock %}
 
 {% block main %}
+    <i class="more_info">{{ message }}</i>
+
     <div>
         {% if profile_data %}
             <h1>{{ profile_data.companyName }}</h1>
@@ -368,7 +370,7 @@
 
                         {% for year in balance_sheet_data %}
                             <td>
-                                {{ ((year.taxAssets or 0) + (year.otherNonCurrentAssets or 0) +(year.otherAssets)) | currency_large }}
+                                {{ ((year.taxAssets or 0) + (year.otherNonCurrentAssets or 0) +(year.otherAssets or 0)) | currency_large }}
                             </td>
                         {% endfor %}
                     </tr>

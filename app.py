@@ -274,7 +274,10 @@ def company():
         return render_template("company.html", message="Select the name or symbol of a company from the results", logged_in=status())
 
     # retrieve the data
-    data = StockData(symbol).package_data()    
+    data = StockData(symbol).package_data()
+
+    if not data:
+        return render_template("company.html", message= "Could not find the symbol's data. Please make sure you enter a valid symbol!", logged_in=status())
 
     # store the search data
     session["last_symbol"] = symbol

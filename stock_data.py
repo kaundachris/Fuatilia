@@ -13,13 +13,13 @@ class StockData():
     BASE_URL = "https://financialmodelingprep.com/stable/"
 
     # API endpoints
-    SEARCH_ENDPOINT = "search-name?query="
-    PROFILE_ENDPOINT = "profile?symbol="
-    PRICES_ENDPOINT = "historical-price-eod/light?symbol="
-    INCOME_STATEMENT_ENDPOINT = "income-statement?symbol="
-    BALANCE_SHEET_ENDPOINT = "balance-sheet-statement?symbol="
-    CASHFLOW_ENDPOINT = "cash-flow-statement?symbol="
-    RATIOS_ENDPOINT = "ratios?symbol="
+    SEARCH_ENDPOINT = "search-name"
+    PROFILE_ENDPOINT = "profile"
+    PRICES_ENDPOINT = "historical-price-eod/light"
+    INCOME_STATEMENT_ENDPOINT = "income-statement"
+    BALANCE_SHEET_ENDPOINT = "balance-sheet-statement"
+    CASHFLOW_ENDPOINT = "cash-flow-statement"
+    RATIOS_ENDPOINT = "ratios"
 
 
     def __init__(self, symbol=None):
@@ -30,32 +30,31 @@ class StockData():
     def build_query(self, endpoint, search_query=None):
         """Builds the links you use to call data from the API"""
 
+        # build the base url
+        url = f"{self.BASE_URL}{endpoint}"
+
         # check for any search query
         if search_query:
-            query = search_query
-
-            # create the query
-            link = f"{self.BASE_URL}{endpoint}{query}&apikey={self.API_KEY}"
+            # create the params
+            params = {"query": search_query, "apikey": self.API_KEY}
             
-            return link
+            return {"url": url, "params": params}
 
         # else, check that the symbol is present
         if self.symbol:
-            query = self.symbol
+            # create the params
+            params = {"symbol": self.symbol, "apikey": self.API_KEY}
+            
+            return {"url": url, "params": params}
 
-            # create the query
-            link = f"{self.BASE_URL}{endpoint}{query}&apikey={self.API_KEY}"
-
-            return link
-
-        raise ValueError("Symbol parameter is missing")        
+        raise ValueError("Symbol parameter is missing")       
 
 
-    def api_call(self, link, identifier):
+    def api_call(self, url, params, identifier):
         """Passes a link to requests to call for data"""
         
         # call the API
-        response = self.session.get(link).json()
+        response = self.session.get(url=url, params=params).json()
 
         # ensure there is data in the filtered results
         if len(response) == 0 or (isinstance(response, dict) and "Error Message" in response):
@@ -67,11 +66,11 @@ class StockData():
     def search(self, query):
         """Gets the symbol for the company searched"""
 
-        # create the query
-        link = self.build_query(self.SEARCH_ENDPOINT, query)
+        # build the query
+        query_data = self.build_query(endpoint=self.SEARCH_ENDPOINT, search_query=query)
 
         # call the API
-        search_data = self.api_call(link, query)
+        search_data = self.api_call(url=query_data["url"], params=query_data["params"], identifier=query)
 
         # filter for US results
         us_results = []
@@ -93,8 +92,8 @@ class StockData():
 
         # Get the data
         try:
-            link = self.build_query(endpoint)
-            fetched_data = self.api_call(link, self.symbol)
+            query_data = self.build_query(endpoint)
+            fetched_data = self.api_call(url=query_data["url"], params=query_data["params"], identifier=self.symbol)
         except ValueError:
             fetched_data = None
 
@@ -163,8 +162,10 @@ class StockData():
 
         # Gets the profile data
         profile_data = self.fetch_data(self.PROFILE_ENDPOINT)
-        if profile_data:
-            profile_data = profile_data[0]
+        if not profile_data:
+            return None
+
+        profile_data = profile_data[0]
 
         # Gets the price data
         price_data = self.price_chart()
