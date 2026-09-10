@@ -5,6 +5,7 @@ import requests, os, json
 import pandas as pd
 import plotly.express as px
 from helpers import needs_refresh, get_db, store_financial_statements
+from concurrent.futures import ThreadPoolExecutor
 
 
 class StockData():
@@ -171,17 +172,24 @@ class StockData():
         price_data = self.price_chart()
 
         if needs_refresh(self.symbol):
+            with ThreadPoolExecutor() as executor:
+                # Runs the API calls concurrently
+                future_income = executor.submit(self.fetch_data, self.INCOME_STATEMENT_ENDPOINT)
+                future_balance_sheet = executor.submit(self.fetch_data, self.BALANCE_SHEET_ENDPOINT)
+                future_cashflow = executor.submit(self.fetch_data, self.CASHFLOW_ENDPOINT)
+                future_ratio = executor.submit(self.fetch_data, self.RATIOS_ENDPOINT)
+
             # Gets the income data
-            income_data = self.fetch_data(self.INCOME_STATEMENT_ENDPOINT)
+            income_data = future_income.result()
 
             # Gets the balance sheet data
-            balance_sheet_data = self.fetch_data(self.BALANCE_SHEET_ENDPOINT)
+            balance_sheet_data = future_balance_sheet.result()
 
             # Gets the cashflow data
-            cashflow_data = self.fetch_data(self.CASHFLOW_ENDPOINT)
+            cashflow_data = future_cashflow.result()
 
             # Gets the ratio data
-            ratio_data = self.fetch_data(self.RATIOS_ENDPOINT)
+            ratio_data = future_ratio.result()
             if ratio_data:
                 ratio_data = ratio_data[0]
 
