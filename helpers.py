@@ -29,6 +29,9 @@ def initialize_db():
                 id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                 symbol TEXT NOT NULL,
                 date_created DATE,
+                date_searched DATE,
+                profile_data TEXT NOT NULL,
+                price_data TEXT NOT NULL,
                 UNIQUE(symbol)
                 )""")
 
@@ -121,19 +124,24 @@ def store_financial_statements(data, symbol):
     """stores financial statements of a searched company in the database"""
 
     # extract the data
+    profile_data = data["profile_data"]
+    price_data = data["price_data"]
     income_data = data["income_data"]
     balance_sheet_data = data["balance_sheet_data"]
     cashflow_data = data["cashflow_data"]
     ratio_data = data["ratio_data"]
-    date_created = None
+    date_created = date.today()
+    date_searched = date.today()
     if ratio_data:
         date_created = date.fromisoformat(ratio_data.get("date"))
 
     with get_db() as db:
         # add the company to the companies table
-        db.execute('''INSERT OR IGNORE INTO companies (symbol, date_created)
-            VALUES (?, ?)''',
-            (symbol, date_created))
+        db.execute('''INSERT INTO companies (symbol, date_created, date_searched, profile_data, price_data)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT (symbol) DO UPDATE SET
+            date_searched = excluded.date_searched, profile_data = excluded.profile_data, price_data = excluded.price_data''',
+            (symbol, date_created, date_searched, json.dumps(profile_data), json.dumps(price_data)))
 
         # get the company id to use in storing the other attributes
         company_id = db.execute("SELECT id FROM companies WHERE symbol = ?", (symbol,)).fetchone()
@@ -170,11 +178,7 @@ def store_financial_statements(data, symbol):
     db.close()
 
 
-def update_user_portfolio(data, symbol):
-    # extract the data
-    profile_data = data["profile_data"]
-    ratio_data = data["ratio_data"]
-
+def update_user_portfolio(profile_data, ratio_data, symbol):
     with get_db() as db:
         # get the company id to use in storing the portfolio attributes
         company_id = db.execute("SELECT id FROM companies WHERE symbol = ?", (symbol,)).fetchone()
@@ -244,7 +248,7 @@ def retrieve_user_portfolio(sort_by=None, order="ASC"):
     return results
 
 
-def needs_refresh(symbol):
+def statements_need_refresh(symbol):
     """determines whether to pull new data depending on age of existing data"""
 
     # extract the date
@@ -261,5 +265,26 @@ def needs_refresh(symbol):
         date_created = date.fromisoformat(date_created)
         age = date.today() - date_created
         return age.days > 366
+
+    return True
+
+
+def price_profile_need_refresh(symbol):
+    """determines whether to pull new data depending on age of existing data"""
+
+    # extract the date
+    with get_db() as db:
+        date_searched = db.execute("SELECT date_searched FROM companies WHERE symbol = ?", (symbol,)).fetchone()
+        if date_searched:
+            date_searched = date_searched["date_searched"]
+
+    # close the connection
+    db.close()
+
+    # compute the age of the data and return it
+    if date_searched:
+        date_searched = date.fromisoformat(date_searched)
+        age = date.today() - date_searched
+        return age.days > 1
 
     return True
