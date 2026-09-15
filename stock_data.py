@@ -4,7 +4,7 @@ load_dotenv()
 import requests, os, json
 import pandas as pd
 import plotly.express as px
-from helpers import needs_refresh, get_db, store_financial_statements
+from helpers import statements_need_refresh, price_profile_need_refresh, get_db, store_financial_statements
 from concurrent.futures import ThreadPoolExecutor
 
 
@@ -116,11 +116,8 @@ class StockData():
         return data
 
 
-    def price_chart(self):
+    def price_chart(self, price_data):
         """render the price chart (closing prices)"""
-
-        # Gets the price data
-        price_data = self.fetch_data(self.PRICES_ENDPOINT)
 
         # set price data to none if API returned nothing
         if not price_data:
@@ -161,17 +158,36 @@ class StockData():
     def package_data(self):
         """Returns the company data in the required format for app.py"""
 
-        # Gets the profile data
-        profile_data = self.fetch_data(self.PROFILE_ENDPOINT)
-        if not profile_data:
-            return None
+        if price_profile_need_refresh(self.symbol):
+            with ThreadPoolExecutor() as executor:
+                # Runs the API calls concurrently
+                future_profile = executor.submit(self.fetch_data, self.PROFILE_ENDPOINT)
+                future_price = executor.submit(self.fetch_data, self.PRICES_ENDPOINT)
 
-        profile_data = profile_data[0]
+            # Gets the profile data
+            profile_data = future_profile.result()
+            if not profile_data:
+                return None
 
-        # Gets the price data
-        price_data = self.price_chart()
+            profile_data = profile_data[0]
 
-        if needs_refresh(self.symbol):
+            # Gets the price data
+            price_data = future_price.result()
+
+            # Draws the price chart
+            price_chart = self.price_chart(price_data)
+
+        else:
+            with get_db() as db:
+                # get the stored price and profile data
+                price_profile_data = db.execute("SELECT * FROM companies WHERE symbol = ?", (self.symbol,)).fetchone()
+                profile_data = json.loads(price_profile_data["profile_data"])
+                price_data = json.loads(price_profile_data["price_data"])
+                price_chart = self.price_chart(price_data)
+            
+            db.close()
+ 
+        if statements_need_refresh(self.symbol):
             with ThreadPoolExecutor() as executor:
                 # Runs the API calls concurrently
                 future_income = executor.submit(self.fetch_data, self.INCOME_STATEMENT_ENDPOINT)
@@ -193,64 +209,51 @@ class StockData():
             if ratio_data:
                 ratio_data = ratio_data[0]
 
-            data = self.build_data_dict(profile_data, price_data, income_data, balance_sheet_data, cashflow_data, ratio_data)
+        else:
+            with get_db() as db:
+                # get the company's id
+                company_id = db.execute("SELECT id FROM companies WHERE symbol = ?", (self.symbol,)).fetchone()
+                company_id = company_id["id"]
 
-            # store the new data
-            store_financial_statements(data, self.symbol)
-    
-            return data
+                # Gets the income data from the database
+                income_data = db.execute("SELECT data FROM income_statements WHERE company_id = ?", (company_id,)).fetchone()
+                if income_data:
+                    income_data = json.loads(income_data["data"])
+                else:
+                    # otherwise, fetch the data
+                    income_data = self.fetch_data(self.INCOME_STATEMENT_ENDPOINT)
 
-        rewrite = False
+                # Gets the balance sheet data from the database
+                balance_sheet_data = db.execute("SELECT data FROM balance_sheets WHERE company_id = ?", (company_id,)).fetchone()
+                if balance_sheet_data:
+                    balance_sheet_data = json.loads(balance_sheet_data["data"])
+                else:
+                    # otherwise, fetch the data
+                    balance_sheet_data = self.fetch_data(self.BALANCE_SHEET_ENDPOINT)
 
-        with get_db() as db:
-            # get the company's id
-            company_id = db.execute("SELECT id FROM companies WHERE symbol = ?", (self.symbol,)).fetchone()
-            company_id = company_id["id"]
-
-            # Gets the income data from the database
-            income_data = db.execute("SELECT data FROM income_statements WHERE company_id = ?", (company_id,)).fetchone()
-            if income_data:
-                income_data = json.loads(income_data["data"])
-            else:
-                # otherwise, fetch the data
-                income_data = self.fetch_data(self.INCOME_STATEMENT_ENDPOINT)
-                rewrite = True
-
-            # Gets the balance sheet data from the database
-            balance_sheet_data = db.execute("SELECT data FROM balance_sheets WHERE company_id = ?", (company_id,)).fetchone()
-            if balance_sheet_data:
-                balance_sheet_data = json.loads(balance_sheet_data["data"])
-            else:
-                # otherwise, fetch the data
-                balance_sheet_data = self.fetch_data(self.BALANCE_SHEET_ENDPOINT)
-                rewrite = True
-
-            # Gets the cashflow data from the database
-            cashflow_data = db.execute("SELECT data FROM cashflows WHERE company_id = ?", (company_id,)).fetchone()
-            if cashflow_data:
-                cashflow_data = json.loads(cashflow_data["data"])
-            else:
-                # otherwise, fetch the data
-                cashflow_data = self.fetch_data(self.CASHFLOW_ENDPOINT)
-                rewrite = True
-                   
-            # Gets the ratio data from the database
-            ratio_data = db.execute("SELECT data FROM ratios WHERE company_id = ?", (company_id,)).fetchone()
-            if ratio_data:
-                ratio_data = json.loads(ratio_data["data"])
-            else:
-                # otherwise, fetch the data
-                ratio_data = self.fetch_data(self.RATIOS_ENDPOINT)
+                # Gets the cashflow data from the database
+                cashflow_data = db.execute("SELECT data FROM cashflows WHERE company_id = ?", (company_id,)).fetchone()
+                if cashflow_data:
+                    cashflow_data = json.loads(cashflow_data["data"])
+                else:
+                    # otherwise, fetch the data
+                    cashflow_data = self.fetch_data(self.CASHFLOW_ENDPOINT)
+                    
+                # Gets the ratio data from the database
+                ratio_data = db.execute("SELECT data FROM ratios WHERE company_id = ?", (company_id,)).fetchone()
                 if ratio_data:
-                    ratio_data = ratio_data[0]
-                rewrite = True
-        
-        db.close()
+                    ratio_data = json.loads(ratio_data["data"])
+                else:
+                    # otherwise, fetch the data
+                    ratio_data = self.fetch_data(self.RATIOS_ENDPOINT)
+                    if ratio_data:
+                        ratio_data = ratio_data[0]
+            
+            db.close()
 
         data = self.build_data_dict(profile_data, price_data, income_data, balance_sheet_data, cashflow_data, ratio_data)
+        store_financial_statements(data, self.symbol)
 
-        # if new data was called, store the data
-        if rewrite:
-            store_financial_statements(data, self.symbol)
+        data["price_data"] = price_chart
 
         return data

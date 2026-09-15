@@ -92,7 +92,10 @@ def register():
     if symbol:
         data = session.get("data")
         if data:
-            update_user_portfolio(data, symbol)
+            # store this in the database
+            profile_data = data["profile_data"]
+            ratio_data = data["ratio_data"]
+            update_user_portfolio(profile_data= profile_data, ratio_data=ratio_data, symbol=symbol)
 
     return redirect("/portfolio")
 
@@ -161,7 +164,10 @@ def login():
     if symbol:
         data = session.get("data")
         if data:
-            update_user_portfolio(data, symbol)
+            # store this in the database
+            profile_data = data["profile_data"]
+            ratio_data = data["ratio_data"]
+            update_user_portfolio(profile_data= profile_data, ratio_data=ratio_data, symbol=symbol)
     
     return redirect("/portfolio")
 
@@ -223,7 +229,10 @@ def reset():
     if symbol:
         data = session.get("data")
         if data:
-            update_user_portfolio(data, symbol)
+            # store this in the database
+            profile_data = data["profile_data"]
+            ratio_data = data["ratio_data"]
+            update_user_portfolio(profile_data= profile_data, ratio_data=ratio_data, symbol=symbol)
 
     return redirect("/portfolio")
 
@@ -303,12 +312,14 @@ def portfolio():
         return render_template("portfolio.html", portfolio=retrieve_user_portfolio())
 
     # retrieve its data
-    data = StockData(symbol).package_data()
+    data = session.get("data")
     if not data:
         return render_template("portfolio.html", portfolio=retrieve_user_portfolio(), message="Could not find the symbol's data. Please make sure you enter a valid symbol!")
 
     # store this in the database
-    update_user_portfolio(data, symbol)
+    profile_data = data["profile_data"]
+    ratio_data = data["ratio_data"]
+    update_user_portfolio(profile_data= profile_data, ratio_data=ratio_data, symbol=symbol)
 
     # render the page with the new entry
     return render_template("portfolio.html", portfolio=retrieve_user_portfolio())
