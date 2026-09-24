@@ -287,7 +287,7 @@ def statements_need_refresh(symbol):
 
 
 def price_profile_need_refresh(symbol):
-    """determines whether to pull new data depending on age of existing data"""
+    """refetch data if data has not been fetched today"""
 
     # extract the date
     with get_db() as db:
@@ -302,6 +302,6 @@ def price_profile_need_refresh(symbol):
     if date_searched:
         date_searched = date.fromisoformat(date_searched)
         age = date.today() - date_searched
-        return age.days > 1
+        return age.days >= 1
 
     return True

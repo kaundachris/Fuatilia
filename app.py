@@ -229,15 +229,15 @@ def index():
         return render_template("index.html", logged_in=status())
 
     # get the user's input
-    company = request.form.get("user_input")
+    company_name = request.form.get("user_input")
 
     # check that user input is not empty
-    if not company:
+    if not company_name:
         return render_template("index.html", message="Please enter the name of the company you want to search!", logged_in=status())
 
     # check that data is retrieved successfully
     try:
-        search_results = StockData().search(company)
+        search_results = StockData().search(company_name)
 
     except ValueError:
         return render_template("index.html", message="Could not find results for the company you entered. Make sure the name is correct.", logged_in=status())
