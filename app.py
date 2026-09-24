@@ -210,11 +210,6 @@ def reset():
     finally:
         db.close()
 
-    # store the user's search - if available - in their database
-    symbol = session.get("last_symbol")
-    if symbol:
-        update_user_portfolio(symbol=symbol)
-
     return redirect("/portfolio")
 
 

@@ -132,17 +132,23 @@ def store_financial_statements(data, symbol):
     ratio_data = data["ratio_data"]
 
     # store the relevant dates
-    statement_date = date.today()
-    date_searched = date.today()
+    date_searched = date.today().isoformat()
+
     if ratio_data:
-        statement_date = date.fromisoformat(ratio_data.get("date"))
+        statement_date = date.fromisoformat(ratio_data.get("date")).isoformat()
+    else:
+        statement_date = None
 
     with get_db() as db:
         # add the company to the companies table
+        # use COALESCE so that a failed ratios call (and thus null date) doesn't erase a known-good date
         db.execute('''INSERT INTO companies (symbol, statement_date, date_searched, profile_data, price_data)
             VALUES (?, ?, ?, ?, ?)
             ON CONFLICT (symbol) DO UPDATE SET
-            date_searched = excluded.date_searched, profile_data = excluded.profile_data, price_data = excluded.price_data''',
+            statement_date = COALESCE(excluded.statement_date, companies.statement_date),
+            date_searched = excluded.date_searched,
+            profile_data = excluded.profile_data,
+            price_data = excluded.price_data''',
             (symbol, statement_date, date_searched, json.dumps(profile_data), json.dumps(price_data)))
 
         # get the company id to use in storing the other attributes
@@ -276,6 +282,7 @@ def statements_need_refresh(symbol):
         age = date.today() - statement_date
         return age.days > 366
 
+    # if there is no date, return TRUE
     return True
 
 
