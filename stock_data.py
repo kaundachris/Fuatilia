@@ -177,8 +177,6 @@ class StockData():
 
             # Gets the price data
             price_data = future_price.result()
-            if not price_data:
-                return None
 
             # Draws the price chart
             price_chart = self.price_chart(price_data)
