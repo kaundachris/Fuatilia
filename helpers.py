@@ -28,7 +28,7 @@ def initialize_db():
         db.execute("""CREATE TABLE IF NOT EXISTS companies(
                 id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                 symbol TEXT NOT NULL,
-                date_created DATE,
+                statement_date DATE,
                 date_searched DATE,
                 profile_data TEXT NOT NULL,
                 price_data TEXT NOT NULL,
@@ -130,18 +130,26 @@ def store_financial_statements(data, symbol):
     balance_sheet_data = data["balance_sheet_data"]
     cashflow_data = data["cashflow_data"]
     ratio_data = data["ratio_data"]
-    date_created = date.today()
-    date_searched = date.today()
+
+    # store the relevant dates
+    date_searched = date.today().isoformat()
+
     if ratio_data:
-        date_created = date.fromisoformat(ratio_data.get("date"))
+        statement_date = date.fromisoformat(ratio_data.get("date")).isoformat()
+    else:
+        statement_date = None
 
     with get_db() as db:
         # add the company to the companies table
-        db.execute('''INSERT INTO companies (symbol, date_created, date_searched, profile_data, price_data)
+        # use COALESCE so that a failed ratios call (and thus null date) doesn't erase a known-good date
+        db.execute('''INSERT INTO companies (symbol, statement_date, date_searched, profile_data, price_data)
             VALUES (?, ?, ?, ?, ?)
             ON CONFLICT (symbol) DO UPDATE SET
-            date_searched = excluded.date_searched, profile_data = excluded.profile_data, price_data = excluded.price_data''',
-            (symbol, date_created, date_searched, json.dumps(profile_data), json.dumps(price_data)))
+            statement_date = COALESCE(excluded.statement_date, companies.statement_date),
+            date_searched = excluded.date_searched,
+            profile_data = excluded.profile_data,
+            price_data = excluded.price_data''',
+            (symbol, statement_date, date_searched, json.dumps(profile_data), json.dumps(price_data)))
 
         # get the company id to use in storing the other attributes
         company_id = db.execute("SELECT id FROM companies WHERE symbol = ?", (symbol,)).fetchone()
@@ -178,26 +186,34 @@ def store_financial_statements(data, symbol):
     db.close()
 
 
-def update_user_portfolio(profile_data, ratio_data, symbol):
+def update_user_portfolio(symbol):
+    """takes the data just searched and adds it to the user's portfolio"""
+
     with get_db() as db:
         # get the company id to use in storing the portfolio attributes
-        company_id = db.execute("SELECT id FROM companies WHERE symbol = ?", (symbol,)).fetchone()
-        company_id = company_id["id"]
+        company_data = db.execute("SELECT id, profile_data FROM companies WHERE symbol = ?", (symbol,)).fetchone()
+        company_id = company_data["id"]
+        profile_data = company_data["profile_data"]
+        profile_data = json.loads(profile_data)
         user_id = session["user_id"]
 
-        # add search to the portfolio table
-        if profile_data:
-            # if ratio data missing, coerce it into an empty dict
-            if ratio_data is None:
-                ratio_data = {}
+        # retrieve the ratio data from the database
+        ratio_data = db.execute("SELECT data FROM ratios WHERE company_id = ?", (company_id,)).fetchone()
+        if ratio_data:
+            ratio_data = json.loads(ratio_data["data"])
 
-            db.execute('''INSERT OR REPLACE INTO portfolios 
-                (user_id, company_id, company_name, company_symbol, price_earnings, price_book,
-                operating_profit_margin, dividend_yield, current_ratio, debt_equity)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
-                (user_id, company_id, profile_data["companyName"], profile_data["symbol"], ratio_data.get("priceToEarningsRatio"),
-                    ratio_data.get("priceToBookRatio"), ratio_data.get("operatingProfitMargin"), ratio_data.get("dividendYieldPercentage"),
-                    ratio_data.get("currentRatio"), ratio_data.get("debtToEquityRatio")))
+        # if ratio data missing, coerce it into an empty dict
+        if ratio_data is None:
+            ratio_data = {}
+
+        # add search to the portfolio table
+        db.execute('''INSERT OR REPLACE INTO portfolios 
+            (user_id, company_id, company_name, company_symbol, price_earnings, price_book,
+            operating_profit_margin, dividend_yield, current_ratio, debt_equity)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+            (user_id, company_id, profile_data["companyName"], profile_data["symbol"], ratio_data.get("priceToEarningsRatio"),
+                ratio_data.get("priceToBookRatio"), ratio_data.get("operatingProfitMargin"), ratio_data.get("dividendYieldPercentage"),
+                ratio_data.get("currentRatio"), ratio_data.get("debtToEquityRatio")))
 
         # commit changes
         db.commit()
@@ -253,19 +269,20 @@ def statements_need_refresh(symbol):
 
     # extract the date
     with get_db() as db:
-        date_created = db.execute("SELECT date_created FROM companies WHERE symbol = ?", (symbol,)).fetchone()
-        if date_created:
-            date_created = date_created["date_created"]
+        statement_date = db.execute("SELECT statement_date FROM companies WHERE symbol = ?", (symbol,)).fetchone()
+        if statement_date:
+            statement_date = statement_date["statement_date"]
 
     # close the connection
     db.close()
 
     # compute the age of the data and return it
-    if date_created:
-        date_created = date.fromisoformat(date_created)
-        age = date.today() - date_created
+    if statement_date:
+        statement_date = date.fromisoformat(statement_date)
+        age = date.today() - statement_date
         return age.days > 366
 
+    # if there is no date, return TRUE
     return True
 
 

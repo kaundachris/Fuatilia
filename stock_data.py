@@ -102,7 +102,7 @@ class StockData():
     
 
     def build_data_dict(self, profile_data, price_data, income_data, balance_sheet_data, cashflow_data, ratio_data):
-        """stores data into a dictionary for easy access"""
+        """packages the data for storage in the database"""
 
         data= {
             "profile_data": profile_data,
@@ -156,7 +156,7 @@ class StockData():
 
 
     def package_data(self):
-        """Returns the company data in the required format for app.py"""
+        """Returns the company data in the required format for app.py for display on the site"""
 
         if price_profile_need_refresh(self.symbol):
             with ThreadPoolExecutor() as executor:
@@ -251,9 +251,11 @@ class StockData():
             
             db.close()
 
+        # build the data dict and store it
         data = self.build_data_dict(profile_data, price_data, income_data, balance_sheet_data, cashflow_data, ratio_data)
         store_financial_statements(data, self.symbol)
 
+        # update price data to the chart for display
         data["price_data"] = price_chart
 
         return data
