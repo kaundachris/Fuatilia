@@ -90,12 +90,7 @@ def register():
     # store the user's search - if available - in their database
     symbol = session.get("last_symbol")
     if symbol:
-        data = session.get("data")
-        if data:
-            # store this in the database
-            profile_data = data["profile_data"]
-            ratio_data = data["ratio_data"]
-            update_user_portfolio(profile_data= profile_data, ratio_data=ratio_data, symbol=symbol)
+        update_user_portfolio(symbol=symbol)
 
     return redirect("/portfolio")
 
@@ -146,15 +141,11 @@ def login():
 
         # Set user data in session after successful login
         last_symbol = session.get("last_symbol")
-        data = session.get("data")
         session.clear()
         session["user_id"] = user["id"]
         
         if last_symbol:
             session["last_symbol"] = last_symbol
-
-        if data:
-            session["data"] = data
 
     finally:
         db.close()
@@ -162,12 +153,7 @@ def login():
     # store the user's search - if available - in their database
     symbol = session.get("last_symbol")
     if symbol:
-        data = session.get("data")
-        if data:
-            # store this in the database
-            profile_data = data["profile_data"]
-            ratio_data = data["ratio_data"]
-            update_user_portfolio(profile_data= profile_data, ratio_data=ratio_data, symbol=symbol)
+        update_user_portfolio(symbol=symbol)
     
     return redirect("/portfolio")
 
@@ -227,12 +213,7 @@ def reset():
     # store the user's search - if available - in their database
     symbol = session.get("last_symbol")
     if symbol:
-        data = session.get("data")
-        if data:
-            # store this in the database
-            profile_data = data["profile_data"]
-            ratio_data = data["ratio_data"]
-            update_user_portfolio(profile_data= profile_data, ratio_data=ratio_data, symbol=symbol)
+        update_user_portfolio(symbol=symbol)
 
     return redirect("/portfolio")
 
@@ -290,8 +271,6 @@ def company():
 
     # store the search data
     session["last_symbol"] = symbol
-    portfolio_data = {"profile_data": data["profile_data"], "ratio_data": data["ratio_data"]}
-    session["data"] = portfolio_data
 
     return render_template("company.html", **data, logged_in=status())
 
@@ -311,15 +290,8 @@ def portfolio():
     if not symbol:
         return render_template("portfolio.html", portfolio=retrieve_user_portfolio())
 
-    # retrieve its data
-    data = session.get("data")
-    if not data:
-        return render_template("portfolio.html", portfolio=retrieve_user_portfolio(), message="Could not find the symbol's data. Please make sure you enter a valid symbol!")
-
     # store this in the database
-    profile_data = data["profile_data"]
-    ratio_data = data["ratio_data"]
-    update_user_portfolio(profile_data= profile_data, ratio_data=ratio_data, symbol=symbol)
+    update_user_portfolio(symbol=symbol)
 
     # render the page with the new entry
     return render_template("portfolio.html", portfolio=retrieve_user_portfolio())
