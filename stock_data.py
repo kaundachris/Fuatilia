@@ -55,7 +55,11 @@ class StockData():
         """Passes a link to requests to call for data"""
         
         # call the API
-        response = self.session.get(url=url, params=params).json()
+        try:
+            response = self.session.get(url=url, params=params, timeout=10).json()
+
+        except requests.RequestException:
+            raise ValueError
 
         # ensure there is data in the filtered results
         if len(response) == 0 or (isinstance(response, dict) and "Error Message" in response):
@@ -173,6 +177,8 @@ class StockData():
 
             # Gets the price data
             price_data = future_price.result()
+            if not price_data:
+                return None
 
             # Draws the price chart
             price_chart = self.price_chart(price_data)
