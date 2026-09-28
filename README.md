@@ -4,7 +4,7 @@ Fuatilia ("to track/follow" in Swahili) is a web app for looking up US-listed co
 
 It was built as a project to learn programming from the ground up, with a focus on connecting a finance background to real code.
 
-**Live demo:** [https://www.fuatilia.com/]
+**Live demo:** https://www.fuatilia.com/
 
 > Fuatilia displays data from a third-party API for learning and research purposes. It is not financial advice.
 
