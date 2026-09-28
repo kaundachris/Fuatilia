@@ -338,7 +338,7 @@ def sort():
         session["order"] = "ASC"
 
     # render the page with the sorted data 
-    return render_template("portfolio.html", portfolio=retrieve_user_portfolio(sort_by=sort_by, order=session["order"]), message="Data updated!")
+    return render_template("portfolio.html", portfolio=retrieve_user_portfolio(sort_by=sort_by, order=session["order"]), message="Data sorted!")
 
 
 if __name__ == "__main__":

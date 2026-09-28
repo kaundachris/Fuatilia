@@ -41,7 +41,7 @@ class StockData():
             
             return {"url": url, "params": params}
 
-        # else, check that the symbol is present
+        # else, check that a symbol is present
         if self.symbol:
             # create the params
             params = {"symbol": self.symbol, "apikey": self.API_KEY}
@@ -130,7 +130,7 @@ class StockData():
         # load into a dataframe - offers safer handling
         df = pd.DataFrame(price_data)
 
-        # convert date (string) to datetime object -reduces bugs
+        # convert date (string) to datetime object - reduces bugs
         df["date"] = pd.to_datetime(df["date"])
         graph = px.line(df, x="date", y ="price")
 
