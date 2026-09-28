@@ -114,7 +114,7 @@ def check_password(password):
         elif char.isalpha():
             has_letter = True
 
-        ## if both of the above are true, exit early (saves time)
+        # if both of the above are true, exit early (saves time)
         if has_digit and has_letter:
             return True
     return False
@@ -135,13 +135,14 @@ def store_financial_statements(data, symbol):
     date_searched = date.today().isoformat()
 
     if ratio_data:
+        # coerce the date to standard ISO format
         statement_date = date.fromisoformat(ratio_data.get("date")).isoformat()
     else:
         statement_date = None
 
     with get_db() as db:
         # add the company to the companies table
-        # use COALESCE so that a failed ratios call (and thus null date) doesn't erase a known-good date
+        # use COALESCE so that a failed ratios call (and thus null date) doesn't erase a stored good date
         db.execute('''INSERT INTO companies (symbol, statement_date, date_searched, profile_data, price_data)
             VALUES (?, ?, ?, ?, ?)
             ON CONFLICT (symbol) DO UPDATE SET
@@ -190,12 +191,16 @@ def update_user_portfolio(symbol):
     """takes the data just searched and adds it to the user's portfolio"""
 
     with get_db() as db:
-        # get the company id to use in storing the portfolio attributes
+        # get the user's id
+        user_id = session["user_id"]
+
+        # get the company id to use in retrieving ratio data
         company_data = db.execute("SELECT id, profile_data FROM companies WHERE symbol = ?", (symbol,)).fetchone()
         company_id = company_data["id"]
+
+        # retrieve the profile data from the database
         profile_data = company_data["profile_data"]
         profile_data = json.loads(profile_data)
-        user_id = session["user_id"]
 
         # retrieve the ratio data from the database
         ratio_data = db.execute("SELECT data FROM ratios WHERE company_id = ?", (company_id,)).fetchone()
@@ -206,7 +211,7 @@ def update_user_portfolio(symbol):
         if ratio_data is None:
             ratio_data = {}
 
-        # add search to the portfolio table
+        # add the company data to the portfolio table
         db.execute('''INSERT OR REPLACE INTO portfolios 
             (user_id, company_id, company_name, company_symbol, price_earnings, price_book,
             operating_profit_margin, dividend_yield, current_ratio, debt_equity)
@@ -304,4 +309,5 @@ def price_profile_need_refresh(symbol):
         age = date.today() - date_searched
         return age.days >= 1
 
+    # if there is no date, return TRUE
     return True
