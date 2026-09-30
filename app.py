@@ -26,7 +26,7 @@ def currency(value):
 def currency_large(value):
     if value is None or isinstance(value, Undefined):
         return ""
-    return "{:,.3f}B".format(value/1000000000)
+    return "{:,.3f} B".format(value/1000000000)
 
 
 @app.route("/register", methods=["GET", "POST"])

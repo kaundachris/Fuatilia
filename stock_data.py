@@ -145,18 +145,28 @@ class StockData():
 
             # set font to the page's family
             font_family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif",
-            
-            # set the vertical gridlines to grey and the graph boundary to white
-            xaxis=dict(gridcolor="#333333", linecolor="#FAEBD7", zerolinecolor="#333333"),
 
-            # set the horizontal gridlines to grey and the graph boundary to white
-            yaxis=dict(gridcolor="#333333", linecolor="#FAEBD7", zerolinecolor="#333333"),
+            # fill the chart's container fully
+            margin=dict(l=0, r=0, t=0, b=0),
+            
+            #set the height
+            height = 300,
+
+            # show one tooltip whatever the position of the cursor
+            hovermode="x unified",
+            
+            # Remove vertical gridlines, axis line, title, and use muted labels
+            xaxis=dict(showgrid=False, showline=False, zeroline=False, title=None, automargin=True, tickfont=dict(size=12, color="#888888")),
+
+            # set a few horizontal gridlines
+            yaxis=dict(gridcolor="#333333", gridwidth=1, nticks=4, showline=False, zeroline=False, title=None,
+                       automargin=True, tickprefix="$", tickfont=dict(size=12, color="#888888")),
         )
         
-        # set the color of the graph to blue for better visibility/differentiation
-        graph.update_traces(line_color="#0A88B3")
+        # set Line to be thinner, and set a cleaner hover label
+        graph.update_traces(line_color="#0A88B3", line_width=1.5, hovertemplate="$%{y:,.2f}<extra></extra>",)
 
-        return graph.to_html(full_html=False, include_plotlyjs="cdn")
+        return graph.to_html(full_html=False, include_plotlyjs="cdn", config={"displayModeBar": False, "responsive": True},)
 
 
     def package_data(self):
