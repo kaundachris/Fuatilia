@@ -1,16 +1,32 @@
+:root {
+    --background-color: black;
+    --font-color: antiquewhite;
+    --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    --header-background: rgb(20, 20, 20);
+    --more-information: rgb(10, 136, 179);
+    --submit-button: rgb(30, 30, 30);
+    --submit-button-hover: rgb(20, 20, 20);
+    --row-border: rgb(30, 30, 30);
+    --section-background: rgb(10, 10, 10);   
+}
+
+
+
 /*global styling*/
 body {
-    color: antiquewhite;
-    background-color: black;
+    color: var(--font-color);
+    background-color: var(--background-color);
     margin: 20px;
     text-align: center;
-    font-family:system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-family:var(--font-family);
     min-width: 700px;
 }
 
+
+
 /*header styling*/
 .header {
-    background-color: rgb(20, 20, 20);
+    background-color: var(--header-background);
     border-radius: 10px;
     display: flex;
     justify-content: space-between;
@@ -26,9 +42,11 @@ h1 {
     justify-content: space-between;
 }
 
-/*main styling*/
-.more_info, .label, .key, .year {
-    color:rgb(10, 136, 179);
+
+
+/*other styling*/
+.more_info {
+    color: var(--more-information);
 }
 
 .search {
@@ -36,19 +54,39 @@ h1 {
     padding: 10px;
 }
 
+.data-section {
+    margin-bottom: 5rem;
+}
+
+.profile {
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    gap: 1rem;
+}
+
+.valuation {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: baseline;
+}
+
 .section {
-    background-color: rgb(40, 40, 40);
+    background-color: var(--section-background);
     border-radius: 10px;
     padding: 5px;
-    margin-top: 30px;
-    margin-bottom: 30px;
+    margin: 1rem;
+    width: 15rem;
 }
 
-.profile_info {
+.company_nav {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-evenly;
 }
 
+
+
+/*authentication styling*/
 input[type="text"], input[type="email"], input[type="password"] {
     margin: 10px;
     width: 80%;
@@ -57,6 +95,9 @@ input[type="text"], input[type="email"], input[type="password"] {
     padding: 10px
 }
 
+
+
+/*navbar buttons*/
 input[name="submit"] {
     margin: 10px;
     border: none;
@@ -66,71 +107,107 @@ input[name="submit"] {
     transition: background-color 0.2s ease;
 }
 
-input[name="sort"] {
-    border: none;
-    color:antiquewhite;
-    background-color:rgb(30, 30, 30);
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
 input[name="submit"]:hover {
-    background-color: antiquewhite;
+    background-color: var(--font-color);
 }
 
-input[name="sort"]:hover {
-    background-color: rgb(20, 20, 20);
-}
 
+
+/*buttons for navigating to company page*/
 button[name="submit"] {
     border: none;
-    color:antiquewhite;
-    background-color:rgb(30, 30, 30);
+    color: var(--font-color);
+    background-color: var(--submit-button);
     cursor: pointer;
     transition: background-color 0.2s ease;
 }
 
 button[name="submit"]:hover {
-    background-color: rgb(20, 20, 20);
+    background-color: var(--submit-button-hover);
 }
 
+
+
+/*sorting buttons in portfolio page*/
+input[name="sort"] {
+    border: none;
+    color: var(--font-color);
+    background-color: var(--sort-submit-color);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+input[name="sort"]:hover {
+    background-color: var(--hover-sort-submit);
+}
+
+
+
+/*table styling*/
 table {
     width: 100%;
     margin-top: 10px;
     margin-bottom: 20px;
     table-layout: fixed;
+    border-collapse: collapse;
 }
 
 td {
-    border-style: none;
-    border-radius: 5px;
     padding: 5px;
 }
 
-tr:nth-child(even) {
-    background-color: rgb(20, 20, 20);
-}
-
-tr:nth-child(odd) {
-    background-color: rgb(30, 30, 30);
+tr {
+    border-bottom: var(--row-border);
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
 }
 
 .label {
-    width: 40%;
+    text-align: left;
 }
 
 .value {
-    width: 60%;
+    text-align: right;
 }
 
-.key {
-    width: 30%;
+
+
+/*statement tabs*/
+.statements input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
 }
 
-.company_nav {
+.statement {
+    display: none;
+}
+
+#tab-income:checked ~ #income,
+#tab-balance:checked ~ #balance,
+#tab-cashflow:checked ~ #cashflow {
+    display: block;
+}
+
+.tabs {
     display: flex;
-    justify-content: space-evenly;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
 }
+
+.tabs label {
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+}
+
+#tab-income:checked ~ .tabs [for="tab-income"],
+#tab-balance:checked ~ .tabs [for="tab-balance"],
+#tab-cashflow:checked ~ .tabs [for="tab-cashflow"] {
+    border-bottom: 2px solid var(--more-information);
+}
+
+
 
 /*footer styling*/
 footer {
@@ -146,7 +223,7 @@ footer {
 
 .socials {
     margin: 10px;
-    color: antiquewhite;
+    color: var(--font-color);
     transition: .2s ease;
     text-decoration: none;
 }
