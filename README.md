@@ -27,6 +27,9 @@ It was built as a project to learn programming from the ground up, with a focus 
 ## Screenshots
 
 **Search**
+![Index page](static/images/index-page.png)
+
+**Search**
 ![Search page](static/images/search-page.png)
 
 **Company page**: profile, price chart, and financial statements
