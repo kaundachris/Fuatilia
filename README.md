@@ -26,7 +26,7 @@ It was built as a project to learn programming from the ground up, with a focus 
 
 ## Screenshots
 
-**Search**
+**Index**
 ![Index page](static/images/index-page.png)
 
 **Search**
