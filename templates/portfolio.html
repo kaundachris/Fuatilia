@@ -95,7 +95,7 @@
                     </strong>
                 </td>
 
-                <td><strong>Delete</strong></td>
+                <td><strong>Update/Delete</strong></td>
             </tr>
         </thead>
 
@@ -129,7 +129,14 @@
                 <td>{{ company.debt_equity | currency }}</td>
 
                 <td style="padding: 5px;">
-                    <div style="display:flex; align-items:center; gap:8px; margin: 5px; padding: 5px;">
+                    <div style="display:flex; justify-content:space-evenly; gap:8px; margin: 5px; padding: 5px;">
+                        <form action="/update" method="post">
+                            <input name="update" id="update" hidden value="{{ company.company_symbol }}">
+                            <button type="submit" name="submit" id="submit">
+                                <i class="material-icons">update</i>
+                            </button>
+                        </form>
+                        
                         <form action="/delete" method="post">
                             <input name="delete" id="delete" hidden value="{{ company.company_symbol }}">
                             <button type="submit" name="submit" id="submit">
