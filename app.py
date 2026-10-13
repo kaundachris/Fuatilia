@@ -315,6 +315,42 @@ def delete():
     return render_template("portfolio.html", portfolio=retrieve_user_portfolio(), message="Data updated!")
 
 
+@app.route("/update", methods=["POST"])
+def update_portfolio():
+    # check that the user is logged in
+    if "user_id" not in session:
+        return redirect("/login")
+
+    # get the id of the stock to update
+    stock_to_update = request.form.get("update")
+    if not stock_to_update:
+        return render_template("portfolio.html", portfolio=retrieve_user_portfolio(), message="Update failed. Please try again")
+
+    # check that the stock is in the user's portfolio
+    db = get_db()
+    try:
+        user_portfolio = db.execute("SELECT * FROM portfolios WHERE company_symbol = ? AND user_id = ?",
+                (stock_to_update, session["user_id"])).fetchone()
+    
+    finally:
+        # close the connection
+        db.close()
+
+    if not user_portfolio:
+        return render_template("portfolio.html", portfolio=retrieve_user_portfolio(), message="Update failed. Please try again")
+
+    # retrieve the data
+    data = StockData(stock_to_update).package_data()
+    if not data:
+        return render_template("portfolio.html", portfolio=retrieve_user_portfolio(), message="Update failed. Please try again")
+
+    # update the portfolio
+    update_user_portfolio(symbol=stock_to_update)
+
+    # render the page with the updated data
+    return render_template("portfolio.html", portfolio=retrieve_user_portfolio(), message="Data updated!")
+
+
 @app.route("/sort", methods=["POST"])
 def sort():
     # check that the user is logged in
