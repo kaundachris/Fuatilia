@@ -185,7 +185,6 @@ The app is hosted on [Render](https://render.com/) and served with Gunicorn (for
 - **API call limit.** The FMP plan in use allows 250 calls a day, and a fully fresh company page can use up to six. Caching reduces this, but many new companies in one day could exhaust it.
 - **Restricted symbols.** Some symbols aren't available on the current API plan. These show an on-page message and are not retried or rate-limited yet.
 - **US exchanges only** (NASDAQ, NYSE, AMEX).
-- **No live refresh of portfolio ratios.** They are a snapshot from when a company was saved, and the portfolio table has no refresh control yet.
 - **Login lockout is stored in the session cookie.** It slows down casual guessing, but it is not real brute-force protection, because clearing cookies resets it. Rate limiting by IP or account would be the proper fix.
 - **No CSRF tokens on forms.** `SameSite=Lax` on the session cookie gives partial protection, but token-based protection (for example, Flask-WTF) is not implemented.
 - **Sorting is a POST that re-renders the page**, and the ASC/DESC direction is a single flag per session rather than per column.

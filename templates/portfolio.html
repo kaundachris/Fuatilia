@@ -38,14 +38,10 @@
                 <td><strong>Company</strong></td>
 
                 <td>
-                    <strong>Symbol</strong>
-                </td>
-
-                <td>
                     <strong>
                         <form action="/sort" method="post">
                             <input name="sort" id="sort" hidden value="price_earnings">
-                            <input type="submit" name="sort" id="sort" value="Price to Earnings">
+                            <input type="submit" name="sort" id="sort" value="PE Ratio">
                         </form>
                     </strong>
                 </td>
@@ -54,7 +50,7 @@
                     <strong>
                         <form action="/sort" method="post">
                             <input name="sort" id="sort" hidden value="price_book">
-                            <input type="submit" name="sort" id="sort" value="Price to Book">
+                            <input type="submit" name="sort" id="sort" value="PB Ratio">
                         </form>
                     </strong>
                 </td>
@@ -72,7 +68,7 @@
                     <strong>
                         <form action="/sort" method="post">
                             <input name="sort" id="sort" hidden value="dividend_yield">
-                            <input type="submit" name="sort" id="sort" value="Dividend Yield">
+                            <input type="submit" name="sort" id="sort" value="Div. Yield">
                         </form>
                     </strong>
                 </td>
@@ -90,7 +86,7 @@
                     <strong>
                         <form action="/sort" method="post">
                             <input name="sort" id="sort" hidden value="debt_equity">
-                            <input type="submit" name="sort" id="sort" value="Debt to Equity">
+                            <input type="submit" name="sort" id="sort" value="Debt/Equity">
                         </form>
                     </strong>
                 </td>
@@ -106,13 +102,6 @@
                     <form action="/company" method="post">
                         <input name="company" id="company" hidden value="{{ company.company_symbol }}">
                         <button type="submit" name="submit" id="submit">{{ company.company_name }}</button>
-                    </form>
-                </td>
-
-                <td>
-                    <form action="/company" method="post">
-                        <input name="company" id="company" hidden value="{{ company.company_symbol }}">
-                        <button type="submit" name="submit" id="submit">{{ company.company_symbol }}</button>
                     </form>
                 </td>
 
