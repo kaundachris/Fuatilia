@@ -18,6 +18,7 @@ It was built as a project to learn programming from the ground up, with a focus 
 - **Save a search from before you sign up.** If you look at a company while logged out, it is added to your portfolio when you register or log in.
 - **Sort** your portfolio by valuation and financial ratios (P/E, P/B, operating profit margin, dividend yield, current ratio, debt-to-equity). Clicking a column header sorts ascending, and clicking again toggles to descending.
 - **Delete** companies from your portfolio.
+- **Update** a saved company's ratios from the portfolio page, without leaving it (see [Portfolio ratios are a snapshot](#portfolio-ratios-are-a-snapshot)).
 - **Reset your password** and **log out** from the portfolio page.
 - **Failed-login lockout.** After two failed attempts, the login form is disabled and asks the user to contact support.
 - **Cache** data locally so repeat visits don't use up API calls (see [How it works](#how-it-works)).
@@ -27,16 +28,16 @@ It was built as a project to learn programming from the ground up, with a focus 
 ## Screenshots
 
 **Index**
-![Index page](static/images/index-page.png)
+![Index page](static/images/index-page.jpeg)
 
 **Search**
-![Search page](static/images/search-page.png)
+![Search page](static/images/search-page.jpeg)
 
 **Company page**: profile, price chart, and financial statements
 ![Company page](static/images/company-page.jpeg)
 
 **Portfolio**: saved companies with sortable ratios
-![Portfolio page](static/images/portfolio-page.png)
+![Portfolio page](static/images/portfolio-page.jpeg)
 
 ---
 
@@ -79,6 +80,8 @@ Within those windows, pages are served from the local database. This matters bec
 
 The ratios in a user's portfolio are copied from the ratios table at the moment the company is saved, so they reflect the data as it was then, not live values. Saving the same company again replaces the old row with fresh values.
 
+The **Update** button on the portfolio page does the same for a saved company without searching for it again. It runs the normal caching check (so it only calls the API if the stored data is stale) and then copies the latest ratios into the portfolio row. Because statements and ratios are only refetched once the stored data is over a year old, Update will not change the ratios until a refetch is due.
+
 ### Database
 
 SQLite with these tables: `users`, `companies` (profile, price data and refresh dates), `portfolios` (one row per user and company), and one table each for `income_statements`, `balance_sheets`, `cashflows` and `ratios` (stored as JSON keyed by company). The schema is created automatically on first run.
@@ -102,7 +105,7 @@ SQLite with these tables: `users`, `companies` (profile, price data and refresh 
 
 ```
 fuatilia/
-├── app.py               # Flask routes: register, login, reset, logout, search, company, portfolio, sort, delete
+├── app.py               # Flask routes: register, login, reset, logout, search, company, portfolio, sort, delete, update
 ├── stock_data.py        # StockData class: calls the FMP API, builds the price chart, handles caching
 ├── helpers.py           # Database connection, schema setup, password check, portfolio storage, refresh checks
 ├── requirements.txt     # Pinned dependencies
