@@ -6,9 +6,9 @@
 
     <div class="nav">
         {% if logged_in %}
-            <form action="/reset" method="get">
-                <input name="reset" id="reset" hidden>
-                <input type="submit" name="submit" id="submit" value="Reset Password">
+            <form action="/change" method="get">
+                <input name="change" id="change" hidden>
+                <input type="submit" name="submit" id="submit" value="Change Password">
             </form>
 
             <form action="/logout" method="get">
