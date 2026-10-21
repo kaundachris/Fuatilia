@@ -169,6 +169,27 @@ class StockData():
         return graph.to_html(full_html=False, include_plotlyjs="cdn", config={"displayModeBar": False, "responsive": True},)
 
 
+    def fetch_or_cache(self, table, company_id, endpoint):
+        '''get data from database. If not available, fetch data'''
+        # Get the data from the database
+        db = get_db()
+        try:
+            query = f"SELECT data FROM {table} WHERE company_id = ?"
+            data = db.execute(query, (company_id,)).fetchone()
+            if data:
+                data = json.loads(data["data"])
+            else:
+                # otherwise, fetch the data
+                data = self.fetch_data(endpoint=endpoint)
+                if data and endpoint == self.RATIOS_ENDPOINT:
+                    data = data[0]
+
+        finally:
+            db.close()
+
+        return data
+
+
     def package_data(self):
         """Returns the company data in the required format for app.py for display on the site"""
 
@@ -231,43 +252,20 @@ class StockData():
                 # get the company's id
                 company_id = db.execute("SELECT id FROM companies WHERE symbol = ?", (self.symbol,)).fetchone()
                 company_id = company_id["id"]
-
-                # Gets the income data from the database
-                income_data = db.execute("SELECT data FROM income_statements WHERE company_id = ?", (company_id,)).fetchone()
-                if income_data:
-                    income_data = json.loads(income_data["data"])
-                else:
-                    # otherwise, fetch the data
-                    income_data = self.fetch_data(self.INCOME_STATEMENT_ENDPOINT)
-
-                # Gets the balance sheet data from the database
-                balance_sheet_data = db.execute("SELECT data FROM balance_sheets WHERE company_id = ?", (company_id,)).fetchone()
-                if balance_sheet_data:
-                    balance_sheet_data = json.loads(balance_sheet_data["data"])
-                else:
-                    # otherwise, fetch the data
-                    balance_sheet_data = self.fetch_data(self.BALANCE_SHEET_ENDPOINT)
-
-                # Gets the cashflow data from the database
-                cashflow_data = db.execute("SELECT data FROM cashflows WHERE company_id = ?", (company_id,)).fetchone()
-                if cashflow_data:
-                    cashflow_data = json.loads(cashflow_data["data"])
-                else:
-                    # otherwise, fetch the data
-                    cashflow_data = self.fetch_data(self.CASHFLOW_ENDPOINT)
-                    
-                # Gets the ratio data from the database
-                ratio_data = db.execute("SELECT data FROM ratios WHERE company_id = ?", (company_id,)).fetchone()
-                if ratio_data:
-                    ratio_data = json.loads(ratio_data["data"])
-                else:
-                    # otherwise, fetch the data
-                    ratio_data = self.fetch_data(self.RATIOS_ENDPOINT)
-                    if ratio_data:
-                        ratio_data = ratio_data[0]
-
             finally:
                 db.close()
+
+            # Gets the income data
+            income_data = self.fetch_or_cache("income_statements", company_id, self.INCOME_STATEMENT_ENDPOINT)
+
+            # Gets the balance sheet data
+            balance_sheet_data = self.fetch_or_cache("balance_sheets", company_id, self.BALANCE_SHEET_ENDPOINT)
+
+            # Gets the cashflow data
+            cashflow_data = self.fetch_or_cache("cashflows", company_id, self.CASHFLOW_ENDPOINT)
+                
+            # Gets the ratio data
+            ratio_data = self.fetch_or_cache("ratios", company_id, self.RATIOS_ENDPOINT)
 
         # build the data dict and store it
         data = self.build_data_dict(profile_data, price_data, income_data, balance_sheet_data, cashflow_data, ratio_data)
