@@ -158,44 +158,44 @@ def login():
     return redirect("/portfolio")
 
 
-@app.route("/reset", methods=["GET", "POST"])
-def reset():
+@app.route("/change", methods=["GET", "POST"])
+def change():
     # check that the user is logged in
     if "user_id" not in session:
         return redirect("/login")
 
     # if from other pages
     if request.method == "GET":
-        return render_template("reset.html")
+        return render_template("change.html")
 
     # check that the password field is not empty
     password = request.form.get("password")
     if not password:
-        return render_template("reset.html", message="Please enter a password!")
+        return render_template("change.html", message="Please enter a password!")
 
     # check that the confirm password field is not empty
     confirm_password = request.form.get("confirm_password")
     if not confirm_password:
-        return render_template("reset.html", message="Please confirm your password!")
+        return render_template("change.html", message="Please confirm your password!")
 
     # Check that password is at least 6 characters long and contains letters, digits and characters
     if not check_password(password):
-        return render_template("reset.html", message="Must contain at least one number and one letter")
+        return render_template("change.html", message="Must contain at least one number and one letter")
 
     # check that the passwords match
     if password != confirm_password:
-        return render_template("reset.html", message="Passwords don't match")
+        return render_template("change.html", message="Passwords don't match")
 
     db = get_db()
     try:
         # Ensure that the username exists in database
         user = db.execute("SELECT * FROM users WHERE id = ?", (session["user_id"],)).fetchone()
         if not user:
-            return render_template("reset.html", message="User not found")
+            return render_template("change.html", message="User not found")
 
         # ensure the password is actually new
         if bcrypt.checkpw(password.encode("utf-8"), user["password_hash"].encode("utf-8")):
-            return render_template("reset.html", message="Enter a new password!")
+            return render_template("change.html", message="Enter a new password!")
 
         # hash the password
         hash_pw = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())

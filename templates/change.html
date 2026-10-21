@@ -19,10 +19,10 @@
 {% endblock %}
 
 {% block main %}
-    <h1>Reset Password Below</h1>
+    <h1>Change Password Below</h1>
     <i class="more_info">Do not use a password you use anywhere else!</i>
 
-    <form action="/reset" method="post">
+    <form action="/change" method="post">
         <div>
             <input type="password" name="password" id="password" autofocus autocomplete="off"
                 placeholder="Must contain at least one number and one letter">
@@ -34,7 +34,7 @@
         </div>
 
         <div>
-            <input type="submit" name="submit" id="submit" value="Reset Password">
+            <input type="submit" name="submit" id="submit" value="Change Password">
         </div>
     </form>
 
