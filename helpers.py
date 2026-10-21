@@ -16,7 +16,8 @@ def get_db():
 
 def initialize_db():
     """creates the database with all the fields needed"""
-    with get_db() as db:
+    db = get_db()
+    try:
         # create the users table
         db.execute("""CREATE TABLE IF NOT EXISTS users(
                 id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -84,8 +85,9 @@ def initialize_db():
         # commit changes to the database
         db.commit()
 
-    # close the connection
-    db.close()
+    finally:
+        # close the connection
+        db.close()
 
 
 def status():
@@ -140,7 +142,8 @@ def store_financial_statements(data, symbol):
     else:
         statement_date = None
 
-    with get_db() as db:
+    db = get_db()
+    try:
         # add the company to the companies table
         # use COALESCE so that a failed ratios call (and thus null date) doesn't erase a stored good date
         db.execute('''INSERT INTO companies (symbol, statement_date, date_searched, profile_data, price_data)
@@ -183,14 +186,16 @@ def store_financial_statements(data, symbol):
         # commit changes
         db.commit()
 
-    # close the connection
-    db.close()
+    finally:
+        # close the connection
+        db.close()
 
 
 def update_user_portfolio(symbol):
     """takes the data just searched and adds it to the user's portfolio"""
 
-    with get_db() as db:
+    db = get_db()
+    try:
         # get the user's id
         user_id = session["user_id"]
 
@@ -223,8 +228,9 @@ def update_user_portfolio(symbol):
         # commit changes
         db.commit()
 
-    # close the connection
-    db.close()
+    finally:
+        # close the connection
+        db.close()
 
 
 def retrieve_user_portfolio(sort_by=None, order="ASC"):
@@ -253,7 +259,8 @@ def retrieve_user_portfolio(sort_by=None, order="ASC"):
         order = "ASC"
 
     #connect to database
-    with get_db() as db:
+    db = get_db()
+    try:
         # get searches related to the user id
         if sort_by:
             # if sort parameter present, sort the results
@@ -263,8 +270,9 @@ def retrieve_user_portfolio(sort_by=None, order="ASC"):
             # if search parameter missing, return results as is
             results = db.execute("SELECT * FROM portfolios WHERE user_id = ?", (session["user_id"],)).fetchall()
 
-    # close the connection
-    db.close()
+    finally:
+        # close the connection
+        db.close()
 
     return results
 
@@ -273,13 +281,15 @@ def statements_need_refresh(symbol):
     """determines whether to pull new data depending on age of existing data"""
 
     # extract the date
-    with get_db() as db:
+    db = get_db()
+    try:
         statement_date = db.execute("SELECT statement_date FROM companies WHERE symbol = ?", (symbol,)).fetchone()
         if statement_date:
             statement_date = statement_date["statement_date"]
 
-    # close the connection
-    db.close()
+    finally:
+        # close the connection
+        db.close()
 
     # compute the age of the data and return it
     if statement_date:
@@ -295,13 +305,15 @@ def price_profile_need_refresh(symbol):
     """refetch data if data has not been fetched today"""
 
     # extract the date
-    with get_db() as db:
+    db = get_db()
+    try:
         date_searched = db.execute("SELECT date_searched FROM companies WHERE symbol = ?", (symbol,)).fetchone()
         if date_searched:
             date_searched = date_searched["date_searched"]
 
-    # close the connection
-    db.close()
+    finally:
+        # close the connection
+        db.close()
 
     # compute the age of the data and return it
     if date_searched:
