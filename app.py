@@ -304,12 +304,15 @@ def delete():
         return render_template("portfolio.html", portfolio=retrieve_user_portfolio(), message="Delete failed. Please try again")
 
     # delete the stock data
-    with get_db() as db:
+    db = get_db()
+    try:
         db.execute("DELETE FROM portfolios WHERE company_symbol = ? AND user_id = ?",
                 (stock_to_delete, session["user_id"]))
+        db.commit()
 
-    # close the connection
-    db.close()
+    finally:
+        # close the connection
+        db.close()
 
     # render the page with the updated data
     return render_template("portfolio.html", portfolio=retrieve_user_portfolio(), message="Data updated!")

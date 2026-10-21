@@ -192,14 +192,16 @@ class StockData():
             price_chart = self.price_chart(price_data)
 
         else:
-            with get_db() as db:
+            db = get_db()
+            try:
                 # get the stored price and profile data
                 price_profile_data = db.execute("SELECT * FROM companies WHERE symbol = ?", (self.symbol,)).fetchone()
                 profile_data = json.loads(price_profile_data["profile_data"])
                 price_data = json.loads(price_profile_data["price_data"])
                 price_chart = self.price_chart(price_data)
-            
-            db.close()
+
+            finally:
+                db.close()
  
         if statements_need_refresh(self.symbol):
             with ThreadPoolExecutor() as executor:
@@ -224,7 +226,8 @@ class StockData():
                 ratio_data = ratio_data[0]
 
         else:
-            with get_db() as db:
+            db = get_db()
+            try:
                 # get the company's id
                 company_id = db.execute("SELECT id FROM companies WHERE symbol = ?", (self.symbol,)).fetchone()
                 company_id = company_id["id"]
@@ -262,8 +265,9 @@ class StockData():
                     ratio_data = self.fetch_data(self.RATIOS_ENDPOINT)
                     if ratio_data:
                         ratio_data = ratio_data[0]
-            
-            db.close()
+
+            finally:
+                db.close()
 
         # build the data dict and store it
         data = self.build_data_dict(profile_data, price_data, income_data, balance_sheet_data, cashflow_data, ratio_data)
