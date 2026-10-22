@@ -1,4 +1,3 @@
-from flask import session
 import os, sqlite3, json
 from datetime import date
 
@@ -88,15 +87,6 @@ def initialize_db():
     finally:
         # close the connection
         db.close()
-
-
-def status():
-    """Checks if the user's id is in the session cookie"""
-
-    if "user_id" in session:
-        return True
-    else:
-        return False
 
 
 def check_password(password):
@@ -191,14 +181,11 @@ def store_financial_statements(data, symbol):
         db.close()
 
 
-def update_user_portfolio(symbol):
+def update_user_portfolio(symbol, user_id):
     """takes the data just searched and adds it to the user's portfolio"""
 
     db = get_db()
     try:
-        # get the user's id
-        user_id = session["user_id"]
-
         # get the company id to use in retrieving ratio data
         company_data = db.execute("SELECT id, profile_data FROM companies WHERE symbol = ?", (symbol,)).fetchone()
         company_id = company_data["id"]
@@ -233,12 +220,8 @@ def update_user_portfolio(symbol):
         db.close()
 
 
-def retrieve_user_portfolio(sort_by=None, order="ASC"):
+def retrieve_user_portfolio(user_id, sort_by=None, order="ASC"):
     """gets all the user search data to populate the portfolio page"""
-
-    # ensure user is logged in
-    if "user_id" not in session:
-        return []
     
     # whitelist of sortable columns (prevents SQL injection)
     valid_columns = [
@@ -265,10 +248,10 @@ def retrieve_user_portfolio(sort_by=None, order="ASC"):
         if sort_by:
             # if sort parameter present, sort the results
             query = f"SELECT * FROM portfolios WHERE user_id = ? ORDER BY {sort_by} {order}"
-            results = db.execute(query, (session["user_id"],)).fetchall()
+            results = db.execute(query, (user_id,)).fetchall()
         else:
             # if search parameter missing, return results as is
-            results = db.execute("SELECT * FROM portfolios WHERE user_id = ?", (session["user_id"],)).fetchall()
+            results = db.execute("SELECT * FROM portfolios WHERE user_id = ?", (user_id,)).fetchall()
 
     finally:
         # close the connection
