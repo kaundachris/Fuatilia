@@ -5,7 +5,7 @@ from flask import Flask, render_template, request, session, redirect
 import os, bcrypt
 from jinja2 import Undefined
 from stock_data import StockData
-from helpers import get_db, initialize_db, status, check_password, update_user_portfolio, retrieve_user_portfolio
+from helpers import get_db, initialize_db, check_password, update_user_portfolio, retrieve_user_portfolio
 
 # initialize the app
 app = Flask(__name__)
@@ -13,6 +13,12 @@ app.secret_key = os.environ.get("SECRET_KEY")
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 app.config["SESSION_COOKIE_SECURE"] = os.environ.get("FLASK_DEBUG") != "1"
 initialize_db()
+
+def status():
+    """Checks if the user's id is in the session cookie"""
+    
+    return "user_id" in session
+
 
 # jinja will use this to format numbers into currency
 @app.template_filter("currency")
@@ -73,13 +79,8 @@ def register():
         db.execute("INSERT INTO users (username, password_hash) VALUES (?, ?)",
                 (username, hash_pw.decode("utf-8")))
 
-        # get user's id
+        # get user's data
         user = db.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
-
-        # Check that user has data
-        if user:
-            # Set user_id in session after successful login
-            session["user_id"] = user["id"]
 
         # commit the changes
         db.commit()
@@ -87,10 +88,21 @@ def register():
     finally:
         db.close()
 
-    # store the user's search - if available - in their database
-    symbol = session.get("last_symbol")
-    if symbol:
-        update_user_portfolio(symbol=symbol)
+    # get the last searched symbol, if any
+    last_symbol = session.get("last_symbol")
+
+    # Set user data in session after successful login
+    session.clear()
+    session["user_id"] = user["id"]
+    if last_symbol:
+        session["last_symbol"] = last_symbol
+
+    # get the user's id
+    user_id = user["id"]
+
+    # store the user's search - if available - in their database    
+    if last_symbol:
+        update_user_portfolio(symbol=last_symbol, user_id=user_id)
 
     return redirect("/portfolio")
 
@@ -139,21 +151,22 @@ def login():
             session["login_counter"] += 1
             return render_template("login.html", message="Invalid username or password!")
 
-        # Set user data in session after successful login
-        last_symbol = session.get("last_symbol")
-        session.clear()
-        session["user_id"] = user["id"]
-        
-        if last_symbol:
-            session["last_symbol"] = last_symbol
-
     finally:
         db.close()
-    
-    # store the user's search - if available - in their database
-    symbol = session.get("last_symbol")
-    if symbol:
-        update_user_portfolio(symbol=symbol)
+
+    # Set user data in session after successful login
+    last_symbol = session.get("last_symbol")
+    session.clear()
+    session["user_id"] = user["id"]
+    if last_symbol:
+        session["last_symbol"] = last_symbol
+
+    # get the user's id
+    user_id = user["id"]
+
+    # store the user's search - if available - in their database    
+    if last_symbol:
+        update_user_portfolio(symbol=last_symbol, user_id=user_id)
     
     return redirect("/portfolio")
 
@@ -276,20 +289,23 @@ def portfolio():
     if "user_id" not in session:
         return redirect("/login")
 
+    # get the user's id
+    user_id = session["user_id"]
+
     if request.method == "GET":
         # populate the page
-        return render_template("portfolio.html", portfolio=retrieve_user_portfolio())
+        return render_template("portfolio.html", portfolio=retrieve_user_portfolio(user_id=user_id))
 
     # get the symbol stored in the session
     symbol = session.get("last_symbol")
     if not symbol:
-        return render_template("portfolio.html", portfolio=retrieve_user_portfolio())
+        return render_template("portfolio.html", portfolio=retrieve_user_portfolio(user_id=user_id))
 
     # store this in the database
-    update_user_portfolio(symbol=symbol)
+    update_user_portfolio(symbol=symbol, user_id=user_id)
 
     # render the page with the new entry
-    return render_template("portfolio.html", portfolio=retrieve_user_portfolio())
+    return render_template("portfolio.html", portfolio=retrieve_user_portfolio(user_id=user_id))
 
 
 @app.route("/delete", methods=["POST"])
@@ -298,16 +314,19 @@ def delete():
     if "user_id" not in session:
         return redirect("/login")
 
+    # get the user's id
+    user_id = session["user_id"]
+
     # get the id of the stock to delete
     stock_to_delete = request.form.get("delete")
     if not stock_to_delete:
-        return render_template("portfolio.html", portfolio=retrieve_user_portfolio(), message="Delete failed. Please try again")
+        return render_template("portfolio.html", portfolio=retrieve_user_portfolio(user_id=user_id), message="Delete failed. Please try again")
 
     # delete the stock data
     db = get_db()
     try:
         db.execute("DELETE FROM portfolios WHERE company_symbol = ? AND user_id = ?",
-                (stock_to_delete, session["user_id"]))
+                (stock_to_delete, user_id))
         db.commit()
 
     finally:
@@ -315,7 +334,7 @@ def delete():
         db.close()
 
     # render the page with the updated data
-    return render_template("portfolio.html", portfolio=retrieve_user_portfolio(), message="Data updated!")
+    return render_template("portfolio.html", portfolio=retrieve_user_portfolio(user_id=user_id), message="Data updated!")
 
 
 @app.route("/update", methods=["POST"])
@@ -324,34 +343,37 @@ def update_portfolio():
     if "user_id" not in session:
         return redirect("/login")
 
+    # get the user's id
+    user_id = session["user_id"]
+
     # get the id of the stock to update
     stock_to_update = request.form.get("update")
     if not stock_to_update:
-        return render_template("portfolio.html", portfolio=retrieve_user_portfolio(), message="Update failed. Please try again")
+        return render_template("portfolio.html", portfolio=retrieve_user_portfolio(user_id=user_id), message="Update failed. Please try again")
 
     # check that the stock is in the user's portfolio
     db = get_db()
     try:
         user_portfolio = db.execute("SELECT * FROM portfolios WHERE company_symbol = ? AND user_id = ?",
-                (stock_to_update, session["user_id"])).fetchone()
+                (stock_to_update, user_id)).fetchone()
     
     finally:
         # close the connection
         db.close()
 
     if not user_portfolio:
-        return render_template("portfolio.html", portfolio=retrieve_user_portfolio(), message="Update failed. Please try again")
+        return render_template("portfolio.html", portfolio=retrieve_user_portfolio(user_id=user_id), message="Update failed. Please try again")
 
     # retrieve the data
     data = StockData(stock_to_update).package_data()
     if not data:
-        return render_template("portfolio.html", portfolio=retrieve_user_portfolio(), message="Update failed. Please try again")
+        return render_template("portfolio.html", portfolio=retrieve_user_portfolio(user_id=user_id), message="Update failed. Please try again")
 
     # update the portfolio
-    update_user_portfolio(symbol=stock_to_update)
+    update_user_portfolio(symbol=stock_to_update, user_id=user_id)
 
     # render the page with the updated data
-    return render_template("portfolio.html", portfolio=retrieve_user_portfolio(), message="Data updated!")
+    return render_template("portfolio.html", portfolio=retrieve_user_portfolio(user_id=user_id), message="Data updated!")
 
 
 @app.route("/sort", methods=["POST"])
@@ -360,10 +382,13 @@ def sort():
     if "user_id" not in session:
         return redirect("/login")
 
+    # get the user's id
+    user_id = session["user_id"]
+
     # get the id of the stock to update
     sort_by = request.form.get("sort")
     if not sort_by:
-        return render_template("portfolio.html", portfolio=retrieve_user_portfolio(), message="Sort failed. Please try again")
+        return render_template("portfolio.html", portfolio=retrieve_user_portfolio(user_id=user_id), message="Sort failed. Please try again")
     
     #retrive the current order 
     current_order = session.get("order")
@@ -377,7 +402,7 @@ def sort():
         session["order"] = "ASC"
 
     # render the page with the sorted data 
-    return render_template("portfolio.html", portfolio=retrieve_user_portfolio(sort_by=sort_by, order=session["order"]), message="Data sorted!")
+    return render_template("portfolio.html", portfolio=retrieve_user_portfolio(user_id=user_id, sort_by=sort_by, order=session["order"]), message="Data sorted!")
 
 
 if __name__ == "__main__":
