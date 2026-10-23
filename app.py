@@ -177,51 +177,76 @@ def change():
     if "user_id" not in session:
         return redirect("/login")
 
+    # get the user's id
+    user_id = session["user_id"]
+
+    # if the login counter hasn't been set, set it to zero
+    if not session.get("login_counter"):
+        session["login_counter"] = 0
+
+    # if the counter is two or greater, disable the fields
+    if session["login_counter"] >= 2:
+        disabled = True
+        return render_template("change.html", message="Contact support", disabled=disabled)
+
     # if from other pages
     if request.method == "GET":
         return render_template("change.html")
 
-    # check that the password field is not empty
-    password = request.form.get("password")
-    if not password:
-        return render_template("change.html", message="Please enter a password!")
+    # check that the current password field is not empty
+    current_password = request.form.get("current_password")
+    if not current_password:
+        return render_template("change.html", message="Please enter your current password!")
+
+    # check that the new password field is not empty
+    new_password = request.form.get("new_password")
+    if not new_password:
+        return render_template("change.html", message="Please enter a new password!")
 
     # check that the confirm password field is not empty
     confirm_password = request.form.get("confirm_password")
     if not confirm_password:
         return render_template("change.html", message="Please confirm your password!")
 
-    # Check that password is at least 6 characters long and contains letters, digits and characters
-    if not check_password(password):
+    # Check that new password is at least 6 characters long and contains letters, digits and characters
+    if not check_password(new_password):
         return render_template("change.html", message="Must contain at least one number and one letter")
 
     # check that the passwords match
-    if password != confirm_password:
+    if new_password != confirm_password:
         return render_template("change.html", message="Passwords don't match")
 
     db = get_db()
     try:
         # Ensure that the username exists in database
-        user = db.execute("SELECT * FROM users WHERE id = ?", (session["user_id"],)).fetchone()
+        user = db.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
         if not user:
-            return render_template("change.html", message="User not found")
+            session["login_counter"] += 1
+            return render_template("change.html", message="Please enter your current password!")
+
+        # ensure the current password matches with the stored password
+        if not bcrypt.checkpw(current_password.encode("utf-8"), user["password_hash"].encode("utf-8")):
+            session["login_counter"] += 1
+            return render_template("change.html", message="Please enter the correct current password!")
 
         # ensure the password is actually new
-        if bcrypt.checkpw(password.encode("utf-8"), user["password_hash"].encode("utf-8")):
+        if bcrypt.checkpw(new_password.encode("utf-8"), user["password_hash"].encode("utf-8")):
             return render_template("change.html", message="Enter a new password!")
 
         # hash the password
-        hash_pw = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+        hash_pw = bcrypt.hashpw(new_password.encode("utf-8"), bcrypt.gensalt())
 
         # add the new password to the user's database
         db.execute("UPDATE users SET password_hash = ? WHERE id = ?",
-                (hash_pw.decode("utf-8"), session["user_id"]))
+                (hash_pw.decode("utf-8"), user_id))
 
         # commit the changes
         db.commit()
 
     finally:
         db.close()
+
+    session["login_counter"] = 0
 
     return redirect("/portfolio")
 
