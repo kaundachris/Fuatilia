@@ -24,13 +24,18 @@
 
     <form action="/change" method="post">
         <div>
-            <input type="password" name="password" id="password" autofocus autocomplete="off"
-                placeholder="Must contain at least one number and one letter">
+            <input type="password" name="current_password" id="current_password" autofocus autocomplete="off"
+                placeholder="Current Password (Must contain at least one number and one letter)" {% if disabled %} disabled {% endif %}>
+        </div>
+
+        <div>
+            <input type="password" name="new_password" id="new_password" autofocus autocomplete="off"
+                placeholder="New Password (Must contain at least one number and one letter)" {% if disabled %} disabled {% endif %}>
         </div>
 
         <div>
             <input type="password" name="confirm_password" id="confirm_password" autofocus autocomplete="off"
-                placeholder="Must match with the password entered above">
+                placeholder="Confirm Password (Must match with the password entered above)" {% if disabled %} disabled {% endif %}>
         </div>
 
         <div>
