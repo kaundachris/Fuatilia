@@ -90,24 +90,32 @@ def initialize_db():
 
 
 def check_password(password):
-    """checks that the password meets security requirements"""
+    """checks that the password:
+            - is at least 6 characters long,
+            - has a number,
+            - has a letter,
+            - has a special character
+    """
 
     has_digit = False
     has_letter = False
+    has_special = False
 
     # check that the password is at least 6 character long
     if len(password) < 6:
         return False
 
-    # check that the password has a number and letter
+    # check that the password has a number, a letter and a special character
     for char in password:
-        if char.isdigit():
+        if char.isnumeric():
             has_digit = True
         elif char.isalpha():
             has_letter = True
+        elif not char.isspace():
+            has_special = True
 
-        # if both of the above are true, exit early (saves time)
-        if has_digit and has_letter:
+        # if all the above are true, exit early (saves time)
+        if has_digit and has_letter and has_special:
             return True
     return False
 
