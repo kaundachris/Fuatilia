@@ -109,7 +109,7 @@
 
                 <td>{{ company.price_book | currency }}</td>
 
-                <td>{{ company.operating_profit_margin | currency }}</td>
+                <td>{{ ((company.operating_profit_margin * 100) or 0) | currency }}%</td>
 
                 <td>{{ company.dividend_yield | currency }}%</td>
 
