@@ -59,7 +59,7 @@ def register():
 
     # Check that password is at least 6 characters long and contains letters, digits and characters
     if not check_password(password):
-        return render_template("register.html", message="Must contain at least one number and one letter")
+        return render_template("register.html", message="6-character minimun, contain at least one number, one letter, and one special character")
 
     # check that the passwords match
     if password != confirm_password:
@@ -210,7 +210,7 @@ def change():
 
     # Check that new password is at least 6 characters long and contains letters, digits and characters
     if not check_password(new_password):
-        return render_template("change.html", message="Must contain at least one number and one letter")
+        return render_template("change.html", message="6-character minimun, contain at least one number, one letter, and one special character")
 
     # check that the passwords match
     if new_password != confirm_password:

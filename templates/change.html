@@ -25,12 +25,12 @@
     <form action="/change" method="post">
         <div>
             <input type="password" name="current_password" id="current_password" autofocus autocomplete="off"
-                placeholder="Current Password (Must contain at least one number and one letter)" {% if disabled %} disabled {% endif %}>
+                placeholder="Current Password (6-character minimun, contain at least one number, one letter, and one special character)" {% if disabled %} disabled {% endif %}>
         </div>
 
         <div>
             <input type="password" name="new_password" id="new_password" autofocus autocomplete="off"
-                placeholder="New Password (Must contain at least one number and one letter)" {% if disabled %} disabled {% endif %}>
+                placeholder="New Password (6-character minimun, contain at least one number, one letter, and one special character)" {% if disabled %} disabled {% endif %}>
         </div>
 
         <div>
