@@ -7,24 +7,24 @@
     <div class="nav">
         {% if logged_in %}
         <form action="/portfolio" method="get">
-            <input name="portfolio" id="portfolio" hidden>
-            <input type="submit" name="submit" id="submit" value="Previous Searches">
+            <input name="portfolio" hidden>
+            <input type="submit" name="submit" value="Previous Searches">
         </form>
 
         <form action="/logout" method="get">
-            <input name="logout" id="logout" hidden>
-            <input type="submit" name="submit" id="submit" value="Log Out">
+            <input name="logout" hidden>
+            <input type="submit" name="submit" value="Log Out">
         </form>
 
         {% else %}
         <form action="/login" method="get">
-            <input name="login" id="login" hidden>
-            <input type="submit" name="submit" id="submit" value="Log In">
+            <input name="login" hidden>
+            <input type="submit" name="submit" value="Log In">
         </form>
 
         <form action="/register" method="get">
-            <input name="register" id="register" hidden>
-            <input type="submit" name="submit" id="submit" value="Register">
+            <input name="register" hidden>
+            <input type="submit" name="submit" value="Register">
         </form>
         {% endif %}
     </div>
@@ -37,11 +37,11 @@
 
     <form class="search" action="/" method="post">
         <div>
-            <input type="text" name="user_input" id="user_input" autofocus autocomplete="off"
+            <input type="text" name="user_input" autofocus autocomplete="off"
                 placeholder="Example: Tesla if you want info on Tesla">
         </div>
         <div>
-            <input type="submit" name="submit" id="submit" value="Get Data">
+            <input type="submit" name="submit" value="Get Data">
         </div>
     </form>
 

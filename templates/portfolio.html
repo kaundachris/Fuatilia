@@ -6,13 +6,13 @@
 
     <div class="nav">
         <form action="/change" method="get">
-            <input name="change" id="change" hidden>
-            <input type="submit" name="submit" id="submit" value="Change Password">
+            <input name="change" hidden>
+            <input type="submit" name="submit" value="Change Password">
         </form>
 
         <form action="/logout" method="get">
-            <input name="logout" id="logout" hidden>
-            <input type="submit" name="submit" id="submit" value="Log Out">
+            <input name="logout" hidden>
+            <input type="submit" name="submit" value="Log Out">
         </form>
     </div>
 </div>
@@ -40,8 +40,8 @@
                 <td>
                     <strong>
                         <form action="/sort" method="post">
-                            <input name="sort" id="sort" hidden value="price_earnings">
-                            <input type="submit" name="sort" id="sort" value="PE Ratio">
+                            <input name="sort" hidden value="price_earnings">
+                            <input type="submit" name="sort" value="PE Ratio">
                         </form>
                     </strong>
                 </td>
@@ -49,8 +49,8 @@
                 <td>
                     <strong>
                         <form action="/sort" method="post">
-                            <input name="sort" id="sort" hidden value="price_book">
-                            <input type="submit" name="sort" id="sort" value="PB Ratio">
+                            <input name="sort" hidden value="price_book">
+                            <input type="submit" name="sort" value="PB Ratio">
                         </form>
                     </strong>
                 </td>
@@ -58,8 +58,8 @@
                 <td>
                     <strong>
                         <form action="/sort" method="post">
-                            <input name="sort" id="sort" hidden value="operating_profit_margin">
-                            <input type="submit" name="sort" id="sort" value="Profit Margin">
+                            <input name="sort" hidden value="operating_profit_margin">
+                            <input type="submit" name="sort" value="Profit Margin">
                         </form>
                     </strong>
                 </td>
@@ -67,8 +67,8 @@
                 <td>
                     <strong>
                         <form action="/sort" method="post">
-                            <input name="sort" id="sort" hidden value="dividend_yield">
-                            <input type="submit" name="sort" id="sort" value="Div. Yield">
+                            <input name="sort" hidden value="dividend_yield">
+                            <input type="submit" name="sort" value="Div. Yield">
                         </form>
                     </strong>
                 </td>
@@ -76,8 +76,8 @@
                 <td>
                     <strong>
                         <form action="/sort" method="post">
-                            <input name="sort" id="sort" hidden value="current_ratio">
-                            <input type="submit" name="sort" id="sort" value="Current Ratio">
+                            <input name="sort" hidden value="current_ratio">
+                            <input type="submit" name="sort" value="Current Ratio">
                         </form>
                     </strong>
                 </td>
@@ -85,8 +85,8 @@
                 <td>
                     <strong>
                         <form action="/sort" method="post">
-                            <input name="sort" id="sort" hidden value="debt_equity">
-                            <input type="submit" name="sort" id="sort" value="Debt/Equity">
+                            <input name="sort" hidden value="debt_equity">
+                            <input type="submit" name="sort" value="Debt/Equity">
                         </form>
                     </strong>
                 </td>
@@ -100,8 +100,8 @@
             <tr>
                 <td>
                     <form action="/company" method="post">
-                        <input name="company" id="company" hidden value="{{ company.company_symbol }}">
-                        <button type="submit" name="submit" id="submit">{{ company.company_name }}</button>
+                        <input name="company" hidden value="{{ company.company_symbol }}">
+                        <button type="submit" name="submit">{{ company.company_name }}</button>
                     </form>
                 </td>
 
@@ -120,15 +120,15 @@
                 <td style="padding: 5px;">
                     <div style="display:flex; justify-content:space-evenly; gap:8px; margin: 5px; padding: 5px;">
                         <form action="/update" method="post">
-                            <input name="update" id="update" hidden value="{{ company.company_symbol }}">
-                            <button type="submit" name="submit" id="submit">
+                            <input name="update" hidden value="{{ company.company_symbol }}">
+                            <button type="submit" name="submit">
                                 <i class="material-icons">update</i>
                             </button>
                         </form>
                         
                         <form action="/delete" method="post">
-                            <input name="delete" id="delete" hidden value="{{ company.company_symbol }}">
-                            <button type="submit" name="submit" id="submit">
+                            <input name="delete" hidden value="{{ company.company_symbol }}">
+                            <button type="submit" name="submit">
                                 <i class="material-icons">delete</i>
                             </button>
                         </form>
@@ -140,7 +140,7 @@
     </table>
 
     <form action="/" method="get">
-        <input name="index" id="index" hidden>
-        <input type="submit" name="submit" id="submit" value="New Search">
+        <input name="index" hidden>
+        <input type="submit" name="submit" value="New Search">
     </form>
 {% endblock %}
