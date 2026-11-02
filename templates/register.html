@@ -6,13 +6,13 @@
     
     <div class="nav">
         <form action="/" method="get">
-            <input name="search" id="search" hidden>
-            <input type="submit" name="submit" id="submit" value="Search">
+            <input name="search" hidden>
+            <input type="submit" name="submit" value="Search">
         </form>
 
         <form action="/login" method="get">
-            <input name="login" id="login" hidden>
-            <input type="submit" name="submit" id="submit" value="Log In">
+            <input name="login" hidden>
+            <input type="submit" name="submit" value="Log In">
         </form>
     </div>
 </div>
@@ -24,18 +24,18 @@
 
     <form action="/register" method="post">
         <div>
-            <input type="email" name="username" id="username" autofocus autocomplete="off" placeholder="Enter your email">
+            <input type="email" name="username" autofocus autocomplete="off" placeholder="Enter your email">
         </div>
         <div>
-            <input type="password" name="password" id="password" autofocus autocomplete="off"
-                placeholder="Password (6-character minimun, contain at least one number, one letter, and one special character)">
+            <input type="password" name="password" autocomplete="off"
+                placeholder="Password (6-character minimum, contain at least one number, one letter, and one special character)">
         </div>
         <div>
-            <input type="password" name="confirm_password" id="confirm_password" autofocus autocomplete="off"
+            <input type="password" name="confirm_password" autocomplete="off"
                 placeholder="Confirm Password (Must match with the password entered above)">
         </div>
         <div>
-            <input type="submit" name="submit" id="submit" value="Register">
+            <input type="submit" name="submit" value="Register">
         </div>
     </form>
 

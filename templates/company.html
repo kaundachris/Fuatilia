@@ -7,24 +7,24 @@
     <div class="nav">
         {% if logged_in %}
             <form action="/change" method="get">
-                <input name="change" id="change" hidden>
-                <input type="submit" name="submit" id="submit" value="Change Password">
+                <input name="change" hidden>
+                <input type="submit" name="submit" value="Change Password">
             </form>
 
             <form action="/logout" method="get">
-                <input name="logout" id="logout" hidden>
-                <input type="submit" name="submit" id="submit" value="Log Out">
+                <input name="logout" hidden>
+                <input type="submit" name="submit" value="Log Out">
             </form>
 
         {% else %}
             <form action="/login" method="get">
-                <input name="login" id="login" hidden>
-                <input type="submit" name="submit" id="submit" value="Log In">
+                <input name="login" hidden>
+                <input type="submit" name="submit" value="Log In">
             </form>
 
             <form action="/register" method="get">
-                <input name="register" id="register" hidden>
-                <input type="submit" name="submit" id="submit" value="Register">
+                <input name="register" hidden>
+                <input type="submit" name="submit" value="Register">
             </form>
         {% endif %}
     </div>
@@ -589,13 +589,13 @@
     
     <div class="company_nav">
         <form action="/" method="get">
-            <input name="index" id="index" hidden>
-            <input type="submit" name="submit" id="submit" value="New Search">
+            <input name="index" hidden>
+            <input type="submit" name="submit" value="New Search">
         </form>
 
         <form action="/portfolio" method="post">
             <input name="portfolio" id="portfolio" hidden>
-            <input type="submit" name="submit" id="submit" value="Add to portfolio">
+            <input type="submit" name="submit" value="Add to portfolio">
         </form>
     </div>
 

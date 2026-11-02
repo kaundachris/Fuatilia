@@ -6,13 +6,13 @@
     
     <div class="nav">
         <form action="/" method="get">
-            <input name="search" id="search" hidden>
-            <input type="submit" name="submit" id="submit" value="Search">
+            <input name="search" hidden>
+            <input type="submit" name="submit" value="Search">
         </form>
 
         <form action="/logout" method="get">
-            <input name="logout" id="logout" hidden>
-            <input type="submit" name="submit" id="submit" value="Log Out">
+            <input name="logout" hidden>
+            <input type="submit" name="submit"  value="Log Out">
         </form>
     </div>
 </div>
@@ -24,22 +24,22 @@
 
     <form action="/change" method="post">
         <div>
-            <input type="password" name="current_password" id="current_password" autofocus autocomplete="off"
-                placeholder="Current Password (6-character minimun, contain at least one number, one letter, and one special character)" {% if disabled %} disabled {% endif %}>
+            <input type="password" name="current_password" autofocus autocomplete="off"
+                placeholder="Current Password (6-character minimum, contain at least one number, one letter, and one special character)" {% if disabled %} disabled {% endif %}>
         </div>
 
         <div>
-            <input type="password" name="new_password" id="new_password" autofocus autocomplete="off"
-                placeholder="New Password (6-character minimun, contain at least one number, one letter, and one special character)" {% if disabled %} disabled {% endif %}>
+            <input type="password" name="new_password" autocomplete="off"
+                placeholder="New Password (6-character minimum, contain at least one number, one letter, and one special character)" {% if disabled %} disabled {% endif %}>
         </div>
 
         <div>
-            <input type="password" name="confirm_password" id="confirm_password" autofocus autocomplete="off"
+            <input type="password" name="confirm_password" autocomplete="off"
                 placeholder="Confirm Password (Must match with the password entered above)" {% if disabled %} disabled {% endif %}>
         </div>
 
         <div>
-            <input type="submit" name="submit" id="submit" value="Change Password">
+            <input type="submit" name="submit" value="Change Password">
         </div>
     </form>
 
