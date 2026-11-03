@@ -14,6 +14,7 @@ app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 app.config["SESSION_COOKIE_SECURE"] = os.environ.get("FLASK_DEBUG") != "1"
 initialize_db()
 
+
 def status():
     """Checks if the user's id is in the session cookie"""
     
