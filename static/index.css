@@ -16,7 +16,7 @@
 body {
     color: var(--font-color);
     background-color: var(--background-color);
-    padding: 20px;
+    padding: 5px;
     text-align: center;
     font-family:var(--font-family);
     box-sizing: border-box;
@@ -123,6 +123,7 @@ button[name="submit"] {
     background-color: var(--submit-button);
     cursor: pointer;
     transition: background-color 0.2s ease;
+    border-radius: 3px;
 }
 
 button[name="submit"]:hover {
@@ -135,13 +136,14 @@ button[name="submit"]:hover {
 input[name="sort"] {
     border: none;
     color: var(--font-color);
-    background-color: var(--sort-submit-color);
+    background-color: var(--submit-button);
     cursor: pointer;
     transition: background-color 0.2s ease;
+    border-radius: 3px;
 }
 
 input[name="sort"]:hover {
-    background-color: var(--hover-sort-submit);
+    background-color: var(--submit-button-hover);
 }
 
 
