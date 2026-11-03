@@ -37,37 +37,39 @@
 
     <i class="more_info">Click on the name or symbol of your desired search</i>
 
-    <table>
-        <thead>
-            <tr>
-                <td><strong>Name</strong></td>
-                <td><strong>Symbol</strong></td>
-                <td><strong>Currency</strong></td>
-                <td><strong>Exchange</strong></td>
-            </tr>
-        </thead>
-
-        <tbody>
-            {% for result in search_results %}
+    <div class="data-section">
+        <table>
+            <thead>
                 <tr>
-                    <td>
-                        <form action="/company" method="post">
-                            <input name="company" hidden value="{{ result.symbol }}">
-                            <button type="submit" name="submit">{{ result.name }}</button>
-                        </form>
-                    </td>
-                    <td>
-                        <form action="/company" method="post">
-                            <input name="company" hidden value="{{ result.symbol }}">
-                            <button type="submit" name="submit">{{ result.symbol }}</button>
-                        </form>
-                    </td>
-                    <td>{{ result.currency }}</td>
-                    <td>{{ result.exchange }}</td>
+                    <td><strong>Name</strong></td>
+                    <td><strong>Symbol</strong></td>
+                    <td><strong>Currency</strong></td>
+                    <td><strong>Exchange</strong></td>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            </thead>
+
+            <tbody>
+                {% for result in search_results %}
+                    <tr>
+                        <td>
+                            <form action="/company" method="post">
+                                <input name="company" hidden value="{{ result.symbol }}">
+                                <button type="submit" name="submit">{{ result.name }}</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form action="/company" method="post">
+                                <input name="company" hidden value="{{ result.symbol }}">
+                                <button type="submit" name="submit">{{ result.symbol }}</button>
+                            </form>
+                        </td>
+                        <td>{{ result.currency }}</td>
+                        <td>{{ result.exchange }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
     <form action="/" method="get">
         <input name="index" hidden>
