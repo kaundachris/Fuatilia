@@ -213,6 +213,15 @@ tr {
     border-bottom: 2px solid var(--more-information);
 }
 
+/**/
+.update-delete {
+    display:flex;
+    justify-content:space-evenly;
+    gap:8px;
+    margin: 5px;
+    padding: 5px;
+}
+
 
 
 /*footer styling*/
