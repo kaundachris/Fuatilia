@@ -76,7 +76,7 @@
 
                 <div class="section">
                     <strong>Operating Profit</strong>
-                    <p>{{ ((ratio_data.operatingProfitMargin * 100) or 0) | currency }}%</p>
+                    <p>{{ ((ratio_data.operatingProfitMargin or 0) * 100) | currency }}%</p>
                 </div>
 
                 <div class="section">

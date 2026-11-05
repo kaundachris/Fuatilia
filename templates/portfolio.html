@@ -42,7 +42,7 @@
                         <strong>
                             <form action="/sort" method="post">
                                 <input name="sort" hidden value="price_earnings">
-                                <input type="submit" name="sort" value="PE Ratio">
+                                <input type="submit" name="sort-buttons" value="PE Ratio">
                             </form>
                         </strong>
                     </td>
@@ -51,7 +51,7 @@
                         <strong>
                             <form action="/sort" method="post">
                                 <input name="sort" hidden value="price_book">
-                                <input type="submit" name="sort" value="PB Ratio">
+                                <input type="submit" name="sort-buttons" value="PB Ratio">
                             </form>
                         </strong>
                     </td>
@@ -60,7 +60,7 @@
                         <strong>
                             <form action="/sort" method="post">
                                 <input name="sort" hidden value="operating_profit_margin">
-                                <input type="submit" name="sort" value="Profit Margin">
+                                <input type="submit" name="sort-buttons" value="Profit Margin">
                             </form>
                         </strong>
                     </td>
@@ -69,7 +69,7 @@
                         <strong>
                             <form action="/sort" method="post">
                                 <input name="sort" hidden value="dividend_yield">
-                                <input type="submit" name="sort" value="Div. Yield">
+                                <input type="submit" name="sort-buttons" value="Div. Yield">
                             </form>
                         </strong>
                     </td>
@@ -78,7 +78,7 @@
                         <strong>
                             <form action="/sort" method="post">
                                 <input name="sort" hidden value="current_ratio">
-                                <input type="submit" name="sort" value="Current Ratio">
+                                <input type="submit" name="sort-buttons" value="Current Ratio">
                             </form>
                         </strong>
                     </td>
@@ -87,7 +87,7 @@
                         <strong>
                             <form action="/sort" method="post">
                                 <input name="sort" hidden value="debt_equity">
-                                <input type="submit" name="sort" value="Debt/Equity">
+                                <input type="submit" name="sort-buttons" value="Debt/Equity">
                             </form>
                         </strong>
                     </td>
@@ -110,7 +110,7 @@
 
                     <td>{{ company.price_book | currency }}</td>
 
-                    <td>{{ ((company.operating_profit_margin * 100) or 0) | currency }}%</td>
+                    <td>{{ ((company.operating_profit_margin or 0) * 100) | currency }}%</td>
 
                     <td>{{ company.dividend_yield | currency }}%</td>
 
