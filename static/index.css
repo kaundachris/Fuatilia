@@ -133,7 +133,7 @@ button[name="submit"]:hover {
 
 
 /*sorting buttons in portfolio page*/
-input[name="sort"] {
+input[name="sort-buttons"] {
     border: none;
     color: var(--font-color);
     background-color: var(--submit-button);
