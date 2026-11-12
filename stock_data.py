@@ -59,7 +59,7 @@ class StockData():
             response = self.session.get(url=url, params=params, timeout=10).json()
 
         except requests.RequestException:
-            raise ValueError
+            raise ValueError("API timeout")
 
         # ensure there is data in the filtered results
         if len(response) == 0 or (isinstance(response, dict) and "Error Message" in response):
@@ -99,8 +99,9 @@ class StockData():
         try:
             query_data = self.build_query(endpoint)
             fetched_data = self.api_call(url=query_data["url"], params=query_data["params"], identifier=self.symbol)
-        except ValueError:
+        except ValueError as error:
             fetched_data = None
+            print(error)
 
         return fetched_data
     
@@ -170,7 +171,7 @@ class StockData():
 
 
     def fetch_or_cache(self, table, company_id, endpoint):
-        '''get data from database. If not available, fetch data'''
+        """get data from database. If not available, fetch data"""
         # Get the data from the database
         db = get_db()
         try:

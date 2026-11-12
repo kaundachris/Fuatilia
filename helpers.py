@@ -144,13 +144,13 @@ def store_financial_statements(data, symbol):
     try:
         # add the company to the companies table
         # use COALESCE so that a failed ratios call (and thus null date) doesn't erase a stored good date
-        db.execute('''INSERT INTO companies (symbol, statement_date, date_searched, profile_data, price_data)
+        db.execute("""INSERT INTO companies (symbol, statement_date, date_searched, profile_data, price_data)
             VALUES (?, ?, ?, ?, ?)
             ON CONFLICT (symbol) DO UPDATE SET
             statement_date = COALESCE(excluded.statement_date, companies.statement_date),
             date_searched = excluded.date_searched,
             profile_data = excluded.profile_data,
-            price_data = excluded.price_data''',
+            price_data = excluded.price_data""",
             (symbol, statement_date, date_searched, json.dumps(profile_data), json.dumps(price_data)))
 
         # get the company id to use in storing the other attributes
@@ -159,26 +159,26 @@ def store_financial_statements(data, symbol):
 
         # add the income statements to the income statements table
         if income_data:
-            db.execute('''INSERT OR REPLACE INTO income_statements (company_id, data)
-                VALUES (?, ?)''',
+            db.execute("""INSERT OR REPLACE INTO income_statements (company_id, data)
+                VALUES (?, ?)""",
                 (company_id, json.dumps(income_data)))
 
         # add the balance sheets to the balance sheets table
         if balance_sheet_data:
-            db.execute('''INSERT OR REPLACE INTO balance_sheets (company_id, data)
-                VALUES (?, ?)''',
+            db.execute("""INSERT OR REPLACE INTO balance_sheets (company_id, data)
+                VALUES (?, ?)""",
                 (company_id, json.dumps(balance_sheet_data)))
         
         # add the cashflow statements to the cashflows table
         if cashflow_data:
-            db.execute('''INSERT OR REPLACE INTO cashflows (company_id, data)
-                VALUES (?, ?)''',
+            db.execute("""INSERT OR REPLACE INTO cashflows (company_id, data)
+                VALUES (?, ?)""",
                 (company_id, json.dumps(cashflow_data)))
         
         # add the ratio data to the ratios table
         if ratio_data:
-            db.execute('''INSERT OR REPLACE INTO ratios (company_id, data)
-                VALUES (?, ?)''',
+            db.execute("""INSERT OR REPLACE INTO ratios (company_id, data)
+                VALUES (?, ?)""",
                 (company_id, json.dumps(ratio_data)))
 
         # commit changes
@@ -212,10 +212,10 @@ def update_user_portfolio(symbol, user_id):
             ratio_data = {}
 
         # add the company data to the portfolio table
-        db.execute('''INSERT OR REPLACE INTO portfolios 
+        db.execute("""INSERT OR REPLACE INTO portfolios 
             (user_id, company_id, company_name, company_symbol, price_earnings, price_book,
             operating_profit_margin, dividend_yield, current_ratio, debt_equity)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (user_id, company_id, profile_data["companyName"], profile_data["symbol"], ratio_data.get("priceToEarningsRatio"),
                 ratio_data.get("priceToBookRatio"), ratio_data.get("operatingProfitMargin"), ratio_data.get("dividendYieldPercentage"),
                 ratio_data.get("currentRatio"), ratio_data.get("debtToEquityRatio")))
