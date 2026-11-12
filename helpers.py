@@ -1,92 +1,5 @@
-import os, sqlite3, json
-from datetime import date
-
-
-def get_db():
-    """creates or opens the database connection"""
-    db_path = os.environ.get("DB_PATH", os.path.join(os.path.dirname(__file__), "fuatilia.db"))
-    connection = sqlite3.connect(db_path)
-
-    # return rows as dictionary-like objects for easy parsing
-    connection.row_factory = sqlite3.Row
-
-    return connection
-
-
-def initialize_db():
-    """creates the database with all the fields needed"""
-    db = get_db()
-    try:
-        # create the users table
-        db.execute("""CREATE TABLE IF NOT EXISTS users(
-                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-                username TEXT NOT NULL UNIQUE,
-                password_hash TEXT NOT NULL
-                )""")
-
-        # store data on all companies searched
-        db.execute("""CREATE TABLE IF NOT EXISTS companies(
-                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-                symbol TEXT NOT NULL,
-                statement_date DATE,
-                date_searched DATE,
-                profile_data TEXT NOT NULL,
-                price_data TEXT NOT NULL,
-                UNIQUE(symbol)
-                )""")
-
-        # create a portfolio table (what each user has searched)
-        db.execute("""CREATE TABLE IF NOT EXISTS portfolios(
-                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-                user_id INTEGER NOT NULL,
-                company_id INTEGER NOT NULL,
-                company_name TEXT NOT NULL,
-                company_symbol TEXT NOT NULL,
-                price_earnings REAL,
-                price_book REAL,
-                operating_profit_margin REAL,
-                dividend_yield REAL,
-                current_ratio REAL,
-                debt_equity REAL,
-                FOREIGN KEY(user_id) REFERENCES users(id),
-                FOREIGN KEY(company_id) REFERENCES companies(id),
-                UNIQUE(user_id, company_id)
-                )""")
-
-        # create the income statements table
-        db.execute("""CREATE TABLE IF NOT EXISTS income_statements(
-                company_id INTEGER PRIMARY KEY,
-                data TEXT NOT NULL,
-                FOREIGN KEY(company_id) REFERENCES companies(id)
-                )""")
-
-        # create the balance sheets table
-        db.execute("""CREATE TABLE IF NOT EXISTS balance_sheets(
-                company_id INTEGER PRIMARY KEY,
-                data TEXT NOT NULL,
-                FOREIGN KEY(company_id) REFERENCES companies(id)
-                )""")
-
-        # create the cashflow statements table
-        db.execute("""CREATE TABLE IF NOT EXISTS cashflows(
-                company_id INTEGER PRIMARY KEY,
-                data TEXT NOT NULL,
-                FOREIGN KEY(company_id) REFERENCES companies(id)
-                )""")
-
-        # create the financial ratios table
-        db.execute("""CREATE TABLE IF NOT EXISTS ratios(
-                company_id INTEGER PRIMARY KEY,
-                data TEXT NOT NULL,
-                FOREIGN KEY(company_id) REFERENCES companies(id)
-                )""")
-
-        # commit changes to the database
-        db.commit()
-
-    finally:
-        # close the connection
-        db.close()
+import pandas as pd
+import plotly.express as px
 
 
 def check_password(password):
@@ -120,197 +33,65 @@ def check_password(password):
     return False
 
 
-def store_financial_statements(data, symbol):
-    """stores financial statements of a searched company in the database"""
+def build_data_dict(profile_data, price_data, income_data, balance_sheet_data, cashflow_data, ratio_data):
+    """packages the data for storage in the database"""
 
-    # extract the data
-    profile_data = data["profile_data"]
-    price_data = data["price_data"]
-    income_data = data["income_data"]
-    balance_sheet_data = data["balance_sheet_data"]
-    cashflow_data = data["cashflow_data"]
-    ratio_data = data["ratio_data"]
+    data= {
+        "profile_data": profile_data,
+        "price_data": price_data,
+        "income_data": income_data,
+        "balance_sheet_data": balance_sheet_data,
+        "cashflow_data": cashflow_data,
+        "ratio_data": ratio_data
+        }
 
-    # store the relevant dates
-    date_searched = date.today().isoformat()
+    return data
 
-    if ratio_data:
-        # coerce the date to standard ISO format
-        statement_date = date.fromisoformat(ratio_data.get("date")).isoformat()
-    else:
-        statement_date = None
 
-    db = get_db()
-    try:
-        # add the company to the companies table
-        # use COALESCE so that a failed ratios call (and thus null date) doesn't erase a stored good date
-        db.execute("""INSERT INTO companies (symbol, statement_date, date_searched, profile_data, price_data)
-            VALUES (?, ?, ?, ?, ?)
-            ON CONFLICT (symbol) DO UPDATE SET
-            statement_date = COALESCE(excluded.statement_date, companies.statement_date),
-            date_searched = excluded.date_searched,
-            profile_data = excluded.profile_data,
-            price_data = excluded.price_data""",
-            (symbol, statement_date, date_searched, json.dumps(profile_data), json.dumps(price_data)))
+def chart(price_data):
+    """render the price chart (closing prices)"""
 
-        # get the company id to use in storing the other attributes
-        company_id = db.execute("SELECT id FROM companies WHERE symbol = ?", (symbol,)).fetchone()
-        company_id = company_id["id"]
+    # set price data to none if API returned nothing
+    if not price_data:
+        return None
 
-        # add the income statements to the income statements table
-        if income_data:
-            db.execute("""INSERT OR REPLACE INTO income_statements (company_id, data)
-                VALUES (?, ?)""",
-                (company_id, json.dumps(income_data)))
+    # load into a dataframe - offers safer handling
+    df = pd.DataFrame(price_data)
 
-        # add the balance sheets to the balance sheets table
-        if balance_sheet_data:
-            db.execute("""INSERT OR REPLACE INTO balance_sheets (company_id, data)
-                VALUES (?, ?)""",
-                (company_id, json.dumps(balance_sheet_data)))
+    # convert date (string) to datetime object - reduces bugs
+    df["date"] = pd.to_datetime(df["date"])
+    graph = px.line(df, x="date", y ="price")
+
+    # update the graph to match the design of the page
+    graph.update_layout(
+        # set background to black - like the html
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+
+        # set font color to antiquewhite - like the html
+        font_color="#FAEBD7",
+
+        # set font to the page's family
+        font_family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif",
+
+        # fill the chart's container fully
+        margin=dict(l=0, r=0, t=0, b=0),
         
-        # add the cashflow statements to the cashflows table
-        if cashflow_data:
-            db.execute("""INSERT OR REPLACE INTO cashflows (company_id, data)
-                VALUES (?, ?)""",
-                (company_id, json.dumps(cashflow_data)))
+        #set the height
+        height = 300,
+
+        # show one tooltip whatever the position of the cursor
+        hovermode="x unified",
         
-        # add the ratio data to the ratios table
-        if ratio_data:
-            db.execute("""INSERT OR REPLACE INTO ratios (company_id, data)
-                VALUES (?, ?)""",
-                (company_id, json.dumps(ratio_data)))
+        # Remove vertical gridlines, axis line, title, and use muted labels
+        xaxis=dict(showgrid=False, showline=False, zeroline=False, title=None, automargin=True, tickfont=dict(size=12, color="#888888")),
 
-        # commit changes
-        db.commit()
-
-    finally:
-        # close the connection
-        db.close()
-
-
-def update_user_portfolio(symbol, user_id):
-    """takes the data just searched and adds it to the user's portfolio"""
-
-    db = get_db()
-    try:
-        # get the company id to use in retrieving ratio data
-        company_data = db.execute("SELECT id, profile_data FROM companies WHERE symbol = ?", (symbol,)).fetchone()
-        company_id = company_data["id"]
-
-        # retrieve the profile data from the database
-        profile_data = company_data["profile_data"]
-        profile_data = json.loads(profile_data)
-
-        # retrieve the ratio data from the database
-        ratio_data = db.execute("SELECT data FROM ratios WHERE company_id = ?", (company_id,)).fetchone()
-        if ratio_data:
-            ratio_data = json.loads(ratio_data["data"])
-
-        # if ratio data missing, coerce it into an empty dict
-        if ratio_data is None:
-            ratio_data = {}
-
-        # add the company data to the portfolio table
-        db.execute("""INSERT OR REPLACE INTO portfolios 
-            (user_id, company_id, company_name, company_symbol, price_earnings, price_book,
-            operating_profit_margin, dividend_yield, current_ratio, debt_equity)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            (user_id, company_id, profile_data["companyName"], profile_data["symbol"], ratio_data.get("priceToEarningsRatio"),
-                ratio_data.get("priceToBookRatio"), ratio_data.get("operatingProfitMargin"), ratio_data.get("dividendYieldPercentage"),
-                ratio_data.get("currentRatio"), ratio_data.get("debtToEquityRatio")))
-
-        # commit changes
-        db.commit()
-
-    finally:
-        # close the connection
-        db.close()
-
-
-def retrieve_user_portfolio(user_id, sort_by=None, order="ASC"):
-    """gets all the user search data to populate the portfolio page"""
+        # set a few horizontal gridlines
+        yaxis=dict(gridcolor="#333333", gridwidth=1, nticks=4, showline=False, zeroline=False, title=None,
+                    automargin=True, tickprefix="$", tickfont=dict(size=12, color="#888888")),
+    )
     
-    # whitelist of sortable columns (prevents SQL injection)
-    valid_columns = [
-        "price_earnings", "price_book", "operating_profit_margin",
-        "dividend_yield", "current_ratio", "debt_equity"
-    ]
+    # set Line to be thinner, and set a cleaner hover label
+    graph.update_traces(line_color="#0A88B3", line_width=1.5, hovertemplate="$%{y:,.2f}<extra></extra>",)
 
-    # whitelist of allowable orders (prevents SQL injection)
-    valid_orders = ["ASC", "DESC"]
-
-
-    # validate the sort item selected
-    if sort_by not in valid_columns:
-        sort_by = None
-
-    # set the order item to "ASC" always
-    if order not in valid_orders:
-        order = "ASC"
-
-    #connect to database
-    db = get_db()
-    try:
-        # get searches related to the user id
-        if sort_by:
-            # if sort parameter present, sort the results
-            query = f"SELECT * FROM portfolios WHERE user_id = ? ORDER BY {sort_by} {order}"
-            results = db.execute(query, (user_id,)).fetchall()
-        else:
-            # if search parameter missing, return results as is
-            results = db.execute("SELECT * FROM portfolios WHERE user_id = ?", (user_id,)).fetchall()
-
-    finally:
-        # close the connection
-        db.close()
-
-    return results
-
-
-def statements_need_refresh(symbol):
-    """determines whether to pull new data depending on age of existing data"""
-
-    # extract the date
-    db = get_db()
-    try:
-        statement_date = db.execute("SELECT statement_date FROM companies WHERE symbol = ?", (symbol,)).fetchone()
-        if statement_date:
-            statement_date = statement_date["statement_date"]
-
-    finally:
-        # close the connection
-        db.close()
-
-    # compute the age of the data and return it
-    if statement_date:
-        statement_date = date.fromisoformat(statement_date)
-        age = date.today() - statement_date
-        return age.days > 366
-
-    # if there is no date, return TRUE
-    return True
-
-
-def price_profile_need_refresh(symbol):
-    """refetch data if data has not been fetched today"""
-
-    # extract the date
-    db = get_db()
-    try:
-        date_searched = db.execute("SELECT date_searched FROM companies WHERE symbol = ?", (symbol,)).fetchone()
-        if date_searched:
-            date_searched = date_searched["date_searched"]
-
-    finally:
-        # close the connection
-        db.close()
-
-    # compute the age of the data and return it
-    if date_searched:
-        date_searched = date.fromisoformat(date_searched)
-        age = date.today() - date_searched
-        return age.days >= 1
-
-    # if there is no date, return TRUE
-    return True
+    return graph.to_html(full_html=False, include_plotlyjs="cdn", config={"displayModeBar": False, "responsive": True},)

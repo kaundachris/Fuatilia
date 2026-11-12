@@ -2,9 +2,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import requests, os, json
-import pandas as pd
-import plotly.express as px
-from helpers import statements_need_refresh, price_profile_need_refresh, get_db, store_financial_statements
+from cache import  statements_need_refresh, price_profile_need_refresh
+from database import get_db, store_financial_statements
+from helpers import chart, build_data_dict
 from concurrent.futures import ThreadPoolExecutor
 
 
@@ -104,70 +104,6 @@ class StockData():
             print(error)
 
         return fetched_data
-    
-
-    def build_data_dict(self, profile_data, price_data, income_data, balance_sheet_data, cashflow_data, ratio_data):
-        """packages the data for storage in the database"""
-
-        data= {
-            "profile_data": profile_data,
-            "price_data": price_data,
-            "income_data": income_data,
-            "balance_sheet_data": balance_sheet_data,
-            "cashflow_data": cashflow_data,
-            "ratio_data": ratio_data
-            }
-
-        return data
-
-
-    def price_chart(self, price_data):
-        """render the price chart (closing prices)"""
-
-        # set price data to none if API returned nothing
-        if not price_data:
-            return None
-
-        # load into a dataframe - offers safer handling
-        df = pd.DataFrame(price_data)
-
-        # convert date (string) to datetime object - reduces bugs
-        df["date"] = pd.to_datetime(df["date"])
-        graph = px.line(df, x="date", y ="price")
-
-        # update the graph to match the design of the page
-        graph.update_layout(
-            # set background to black - like the html
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
-
-            # set font color to antiquewhite - like the html
-            font_color="#FAEBD7",
-
-            # set font to the page's family
-            font_family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif",
-
-            # fill the chart's container fully
-            margin=dict(l=0, r=0, t=0, b=0),
-            
-            #set the height
-            height = 300,
-
-            # show one tooltip whatever the position of the cursor
-            hovermode="x unified",
-            
-            # Remove vertical gridlines, axis line, title, and use muted labels
-            xaxis=dict(showgrid=False, showline=False, zeroline=False, title=None, automargin=True, tickfont=dict(size=12, color="#888888")),
-
-            # set a few horizontal gridlines
-            yaxis=dict(gridcolor="#333333", gridwidth=1, nticks=4, showline=False, zeroline=False, title=None,
-                       automargin=True, tickprefix="$", tickfont=dict(size=12, color="#888888")),
-        )
-        
-        # set Line to be thinner, and set a cleaner hover label
-        graph.update_traces(line_color="#0A88B3", line_width=1.5, hovertemplate="$%{y:,.2f}<extra></extra>",)
-
-        return graph.to_html(full_html=False, include_plotlyjs="cdn", config={"displayModeBar": False, "responsive": True},)
 
 
     def fetch_or_cache(self, table, company_id, endpoint):
@@ -211,7 +147,7 @@ class StockData():
             price_data = future_price.result()
 
             # Draws the price chart
-            price_chart = self.price_chart(price_data)
+            price_chart = chart(price_data)
 
         else:
             db = get_db()
@@ -220,7 +156,7 @@ class StockData():
                 price_profile_data = db.execute("SELECT * FROM companies WHERE symbol = ?", (self.symbol,)).fetchone()
                 profile_data = json.loads(price_profile_data["profile_data"])
                 price_data = json.loads(price_profile_data["price_data"])
-                price_chart = self.price_chart(price_data)
+                price_chart = chart(price_data)
 
             finally:
                 db.close()
@@ -269,7 +205,7 @@ class StockData():
             ratio_data = self.fetch_or_cache("ratios", company_id, self.RATIOS_ENDPOINT)
 
         # build the data dict and store it
-        data = self.build_data_dict(profile_data, price_data, income_data, balance_sheet_data, cashflow_data, ratio_data)
+        data = build_data_dict(profile_data, price_data, income_data, balance_sheet_data, cashflow_data, ratio_data)
         store_financial_statements(data, self.symbol)
 
         # update price data to the chart for display
