@@ -4,8 +4,11 @@ load_dotenv()
 from flask import Flask, render_template, request, session, redirect
 import os, bcrypt
 from jinja2 import Undefined
-from stock_data import StockData
-from helpers import get_db, initialize_db, check_password, update_user_portfolio, retrieve_user_portfolio
+from fetch import StockData
+from database import get_db, initialize_db
+from helpers import check_password
+from portfolio import update_user_portfolio, retrieve_user_portfolio
+
 
 # initialize the app
 app = Flask(__name__)
